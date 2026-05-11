@@ -1,0 +1,30 @@
+### Test API
+GET http://localhost:3000/
+
+
+### Get all reports
+GET http://localhost:3000/api/reports
+
+### Create report
+POST http://localhost:3000/api/reports
+Content-Type: application/json
+
+{
+  "animal": "Leopard",
+  "location": "Main Campus Gate B",
+  "date": "2026-05-06",
+  "time": "14:30",
+  "description": "Large leopard seen near entrance.",
+  "threatLevel": "Extreme"
+}
+
+### Update report
+PUT http://localhost:3000/api/reports/1
+Content-Type: application/json
+
+{
+  "status": "Resolved"
+}
+
+### Delete report
+DELETE http://localhost:3000/api/reports/1
