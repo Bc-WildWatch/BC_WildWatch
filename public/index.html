@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SA WildWatch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #C8102E;
+    --red-dark: #a00d24;
+    --red-light: #e8192e;
+    --black: #0d0f12;
+    --dark: #f4f5f7;
+    --mid: #eef0f3;
+    --border: #dde0e6;
+    --text: #1a1d23;
+    --muted: #6b7280;
+    --white: #ffffff;
+    --green: #16a34a;
+    --yellow: #d97706;
+    --blue: #2563eb;
+    --card: #ffffff;
+    --nav-bg: #0d0f12;
+    --nav-text: #ffffff;
+    --sidebar-bg: #ffffff;
+    --page-bg: #f4f5f7;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--page-bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px; height: 56px;
+    background: var(--nav-bg);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .nav-brand { display: flex; align-items: center; gap: 10px; }
+  .nav-logo {
+    width: 32px; height: 32px; background: var(--red);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: white;
+    clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  }
+  .nav-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; color: #ffffff; }
+  .nav-tabs { display: flex; gap: 2px; }
+  .nav-tab {
+    padding: 6px 16px; font-size: 12px; font-weight: 500; letter-spacing: 0.5px;
+    border: none; background: transparent; color: rgba(255,255,255,0.55); cursor: pointer;
+    border-radius: 4px; transition: all 0.2s; text-transform: uppercase;
+  }
+  .nav-tab:hover { color: #ffffff; background: rgba(255,255,255,0.1); }
+  .nav-tab.active { color: #ffffff; background: var(--red); }
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .notif-btn {
+    width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 14px; position: relative;
+  }
+  .notif-dot {
+    position: absolute; top: 5px; right: 5px; width: 7px; height: 7px;
+    background: var(--red); border-radius: 50%; border: 2px solid var(--nav-bg);
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; padding-top: 56px; min-height: 100vh; }
+  .screen.active { display: block; }
+
+  /* ════════════════════════════════
+     SCREEN 1 – DASHBOARD
+  ════════════════════════════════ */
+  .dashboard-layout {
+    display: grid; grid-template-columns: 340px 1fr;
+    gap: 0; height: calc(100vh - 56px);
+  }
+  .dash-sidebar {
+    background: var(--white); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; overflow: hidden; min-height: 0;
+  }
+  .dash-sidebar-header {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .dash-label { font-size: 10px; font-weight: 600; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+  .dash-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--text); }
+  .dash-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .stat-box { background: var(--mid); border-radius: 6px; padding: 12px; }
+  .stat-box.alert { border-left: 3px solid var(--red); }
+  .stat-box.info { border-left: 3px solid var(--blue); }
+  .stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 32px; line-height: 1; }
+  .stat-box.alert .stat-num { color: var(--red); }
+  .stat-box.info .stat-num { color: var(--blue); }
+  .stat-label-small { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+
+  .dash-latest {
+    padding: 8px 20px;
+    font-size: 11px; color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    background: #fff8f8;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .dash-latest span { color: var(--text); font-weight: 600; }
+  .blink { animation: blink 1.2s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  .incidents-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; min-height: 0;}
+  .incidents-list::-webkit-scrollbar { width: 4px; }
+  .incidents-list::-webkit-scrollbar-track { background: transparent; }
+  .incidents-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .incident-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 14px 12px; cursor: pointer; transition: all 0.2s;
+    position: relative; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .incident-card:hover { border-color: var(--red); transform: translateX(2px); box-shadow: 0 2px 8px rgba(200,16,46,0.1); }
+  .incident-card.selected { border-color: var(--red); background: #fff5f6; }
+  .incident-card::before {
+    content:''; position:absolute; left:0;top:0;bottom:0; width:3px;
+  }
+  .incident-card.extreme::before { background: var(--red); }
+  .incident-card.priority::before { background: var(--yellow); }
+  .incident-card.informational::before { background: var(--blue); }
+  .incident-card.resolved::before { background: var(--green); }
+
+  .inc-badge {
+    display: inline-block; padding: 2px 7px; border-radius: 3px;
+    font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px;
+  }
+  .badge-extreme { background: var(--red); color: white; }
+  .badge-priority { background: var(--yellow); color: #000; }
+  .badge-informational { background: var(--blue); color: white; }
+  .badge-resolved { background: rgba(34,197,94,0.2); color: var(--green); border: 1px solid var(--green); }
+
+  .inc-name { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .inc-loc { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+  .inc-actions { display: flex; gap: 6px; margin-top: 10px; }
+  .btn-sm {
+    padding: 5px 12px; font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
+    border-radius: 4px; border: none; cursor: pointer; text-transform: uppercase; transition: all 0.15s;
+  }
+  .btn-red { background: var(--red); color: white; }
+  .btn-red:hover { background: var(--red-dark); }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--text); color: var(--text); }
+  .inc-dismiss {
+    position: absolute; right: 10px; top: 10px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 1px solid var(--border); background: transparent; color: var(--muted);
+    cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .inc-dismiss:hover { border-color: var(--red); color: var(--red); }
+
+  .dash-footer {
+    padding: 12px 20px; border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: flex-end;
+  }
+  .btn-new-sighting {
+    padding: 8px 18px; background: var(--red); color: white;
+    border: none; border-radius: 5px; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.5px; cursor: pointer; text-transform: uppercase;
+    display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+  }
+  .btn-new-sighting:hover { background: var(--red-dark); transform: translateY(-1px); }
+
+  /* MAP PANEL */
+  .dash-map {
+    position: relative; background: #0d1117; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .map-header {
+    padding: 14px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(0,0,0,0.4);
+  }
+  .map-header h3 { font-size: 13px; font-weight: 600; color: var(--white); }
+  .map-body { flex: 1; position: relative; }
+  .map-canvas {
+    width: 100%; height: 100%;
+    background: radial-gradient(ellipse at 40% 40%, #1a2535 0%, #0d1117 60%);
+  }
+  /* SVG campus map drawn in JS */
+  #campus-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  .map-pin {
+    position: absolute; transform: translate(-50%,-100%);
+    display: flex; flex-direction: column; align-items: center; cursor: pointer;
+  }
+  .map-pin-dot {
+    width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;
+    animation: pulse-pin 2s infinite;
+  }
+  @keyframes pulse-pin {
+    0%,100%{box-shadow:0 0 0 0 rgba(200,16,46,0.7)}
+    50%{box-shadow:0 0 0 8px rgba(200,16,46,0)}
+  }
+  .map-pin-label {
+    background: rgba(0,0,0,0.85); color: white; font-size: 9px; font-weight: 600;
+    padding: 2px 6px; border-radius: 3px; white-space: nowrap; margin-top: 4px;
+  }
+  .map-legend {
+    position: absolute; bottom: 16px; right: 16px;
+    background: rgba(255,255,255,0.92); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px; font-size: 10px; color: var(--muted);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ════════════════════════════════
+     SCREEN 2 – SAFETY PORTAL
+  ════════════════════════════════ */
+  .safety-layout {
+    display: grid; grid-template-columns: 1fr 360px;
+    gap: 0; height: calc(100vh - 56px);
+  }
+  .safety-main { overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 20px; background: var(--page-bg); }
+  .safety-main::-webkit-scrollbar { width: 4px; }
+  .safety-main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .safety-hero {
+    background: var(--white); border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px 24px; position: relative; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .safety-hero::before {
+    content:''; position:absolute; right:-40px;top:-40px;
+    width:200px;height:200px; background: radial-gradient(circle, rgba(200,16,46,0.15) 0%,transparent 70%);
+    border-radius: 50%;
+  }
+  .safety-badge {
+    display: inline-block; background: var(--red); color: white;
+    font-size: 9px; font-weight: 700; letter-spacing: 2px; padding: 3px 10px;
+    border-radius: 3px; text-transform: uppercase; margin-bottom: 12px;
+  }
+  .safety-hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: 30px; line-height: 1; color: var(--text); margin-bottom: 8px; }
+  .safety-hero p { font-size: 12px; color: var(--muted); max-width: 560px; line-height: 1.5; }
+
+  .quick-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .qa-btn {
+    padding: 10px 18px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--white); color: var(--text); font-size: 12px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; gap: 7px; transition: all 0.2s;
+    text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .qa-btn:hover { border-color: var(--red); color: var(--red); }
+  .qa-btn.danger { background: var(--red); border-color: var(--red); color: white; }
+  .qa-btn.danger:hover { background: var(--red-dark); }
+
+  .emergency-card {
+    background: var(--red); border-radius: 10px; padding: 22px;
+    position: relative; overflow: hidden;
+  }
+  .emergency-card::after {
+    content:'★'; position:absolute; right:20px;bottom:-10px;
+    font-size:80px; opacity:0.1; color:white;
+  }
+  .emergency-card h3 { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: white; letter-spacing: 2px; margin-bottom: 14px; }
+  .emergency-contact { margin-bottom: 12px; }
+  .ec-label { font-size: 10px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+  .ec-number { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: white; letter-spacing: 1px; }
+  .ec-note { font-size: 11px; color: rgba(255,255,255,0.75); }
+
+  .resources-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .resource-item {
+    background: var(--white); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer;
+    transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .resource-item:hover { border-color: var(--blue); }
+  .resource-icon { font-size: 20px; }
+  .resource-name { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .resource-desc { font-size: 10px; color: var(--muted); }
+
+  /* MAP MINI */
+  .safety-map { background: #e8edf5; border-left: 1px solid var(--border); position: relative; overflow: hidden; }
+  .safety-map-header { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--text); background: var(--white); }
+  .safety-map-body { height: calc(100% - 48px); position: relative; }
+
+  /* CHATBOT */
+  .chat-panel {
+    background: var(--white); border: 1px solid var(--border); border-radius: 10px;
+    display: flex; flex-direction: column; height: 360px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .chat-header {
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--text);
+  }
+  .chat-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: blink 2s infinite; }
+  .chat-messages { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; background: #fafbfc; }
+  .chat-messages::-webkit-scrollbar { width: 3px; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--border); }
+  .chat-msg { max-width: 85%; }
+  .chat-msg.bot { align-self: flex-start; }
+  .chat-msg.user { align-self: flex-end; }
+  .msg-bubble {
+    padding: 9px 13px; border-radius: 10px; font-size: 12px; line-height: 1.5;
+  }
+  .chat-msg.bot .msg-bubble { background: var(--mid); color: var(--text); border-radius: 2px 10px 10px 10px; }
+  .chat-msg.user .msg-bubble { background: var(--red); color: white; border-radius: 10px 2px 10px 10px; }
+  .chat-input-row {
+    padding: 10px 12px; border-top: 1px solid var(--border);
+    display: flex; gap: 8px; align-items: center; background: var(--white);
+  }
+  .chat-input {
+    flex: 1; background: var(--mid); border: 1px solid var(--border); border-radius: 6px;
+    padding: 8px 12px; font-size: 12px; color: var(--text); font-family: 'DM Sans', sans-serif;
+    outline: none;
+  }
+  .chat-input:focus { border-color: var(--red); }
+  .chat-send {
+    width: 32px; height: 32px; background: var(--red); border: none; border-radius: 6px;
+    color: white; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .chat-send:hover { background: var(--red-dark); }
+
+  /* ════════════════════════════════
+     SCREEN 3 – ANALYTICS
+  ════════════════════════════════ */
+  .analytics-page { padding: 28px; overflow-y: auto; height: calc(100vh - 56px); }
+  .analytics-page::-webkit-scrollbar { width: 4px; }
+  .analytics-page::-webkit-scrollbar-thumb { background: var(--border); }
+  .analytics-hero { margin-bottom: 24px; }
+  .analytics-hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: var(--text); margin-bottom: 6px; }
+  .analytics-hero p { font-size: 13px; color: var(--muted); }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+  .kpi-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: 8px;
+    padding: 16px 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .kpi-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .kpi-value { font-family: 'Bebas Neue', sans-serif; font-size: 36px; line-height: 1; color: var(--text); margin-bottom: 4px; }
+  .kpi-sub { font-size: 11px; display: flex; align-items: center; gap: 4px; }
+  .kpi-up { color: var(--green); }
+  .kpi-live { color: var(--red); display: flex; align-items: center; gap: 4px; }
+  .live-dot { width: 6px; height: 6px; background: var(--red); border-radius: 50%; animation: blink 1s infinite; }
+
+  .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+  .analytics-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .ac-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .ac-sub { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+
+  /* Bar Chart */
+  .bar-chart { display: flex; flex-direction: column; gap: 8px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; }
+  .bar-label { font-size: 11px; color: var(--muted); width: 80px; flex-shrink: 0; }
+  .bar-track { flex: 1; background: var(--mid); border-radius: 2px; height: 8px; }
+  .bar-fill { height: 100%; border-radius: 2px; transition: width 0.8s ease; }
+  .bar-pct { font-size: 11px; color: var(--muted); width: 32px; text-align: right; }
+
+  /* Monthly chart */
+  .monthly-chart { display: flex; align-items: flex-end; gap: 6px; height: 100px; }
+  .month-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .month-bar { width: 100%; border-radius: 3px 3px 0 0; transition: height 0.6s ease; }
+  .month-name { font-size: 9px; color: var(--muted); text-transform: uppercase; }
+
+  /* Heatmap */
+  .heatmap-wrap { position: relative; border-radius: 8px; overflow: hidden; }
+  #heatmap-canvas { width: 100%; height: 200px; border-radius: 8px; }
+  .heatmap-legend-row { display: flex; gap: 12px; margin-top: 10px; }
+  .heatmap-legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--muted); }
+  .heatmap-swatch { width: 10px; height: 10px; border-radius: 2px; }
+
+  /* Recent reports */
+  .reports-list { display: flex; flex-direction: column; gap: 10px; }
+  .report-item {
+    display: flex; gap: 12px; padding: 12px; background: var(--mid);
+    border-radius: 8px; align-items: flex-start; border: 1px solid var(--border);
+  }
+  .report-animal-icon { font-size: 22px; }
+  .report-info { flex: 1; }
+  .report-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .report-detail { font-size: 11px; color: var(--muted); }
+  .report-time { font-size: 10px; color: var(--muted); white-space: nowrap; }
+
+  /* ════════════════════════════════
+     SCREEN 4 – REPORT FORM
+  ════════════════════════════════ */
+  .report-page { padding: 28px; overflow-y: auto; height: calc(100vh - 56px); }
+  .report-page::-webkit-scrollbar { width: 4px; }
+  .report-page::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .report-layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
+
+  .report-form-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 28px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .report-hero-badge {
+    display: inline-block; background: var(--red); color: white;
+    font-size: 9px; font-weight: 700; letter-spacing: 2px; padding: 3px 10px;
+    border-radius: 3px; text-transform: uppercase; margin-bottom: 10px;
+  }
+  .report-form-card h1 { font-family: 'Bebas Neue', sans-serif; font-size: 48px; line-height: 1; color: var(--text); margin-bottom: 24px; }
+
+  .upload-zone {
+    border: 2px dashed var(--border); border-radius: 10px; padding: 32px;
+    text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 20px;
+    background: var(--mid);
+  }
+  .upload-zone:hover { border-color: var(--red); background: #fff5f6; }
+  .upload-icon { font-size: 32px; margin-bottom: 8px; }
+  .upload-text { font-size: 12px; color: var(--muted); }
+  .upload-text strong { color: var(--text); }
+
+  .form-group { margin-bottom: 18px; }
+  .form-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; display: block; }
+  .form-input, .form-textarea, .form-select {
+    width: 100%; background: var(--white); border: 1px solid var(--border); border-radius: 6px;
+    padding: 10px 14px; font-size: 13px; color: var(--text); font-family: 'DM Sans', sans-serif;
+    outline: none; transition: border-color 0.2s;
+  }
+  .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--red); }
+  .form-textarea { resize: vertical; min-height: 80px; }
+  .form-select option { background: var(--white); color: var(--text); }
+
+  .animal-type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .animal-type-btn {
+    padding: 10px 8px; border: 1px solid var(--border); border-radius: 6px;
+    background: var(--white); color: var(--muted); font-size: 11px; font-weight: 600;
+    cursor: pointer; text-align: center; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .animal-type-btn:hover { border-color: var(--text); color: var(--text); }
+  .animal-type-btn.selected { border-color: var(--red); color: var(--red); background: #fff5f6; }
+
+  .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .btn-submit {
+    width: 100%; padding: 14px; background: var(--red); color: white; border: none;
+    border-radius: 6px; font-size: 13px; font-weight: 700; letter-spacing: 1px;
+    cursor: pointer; text-transform: uppercase; transition: all 0.2s; margin-top: 6px;
+  }
+  .btn-submit:hover { background: var(--red-dark); transform: translateY(-1px); }
+
+  .btn-request-info {
+    width: 100%; padding: 10px; background: transparent; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 6px; font-size: 12px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s; margin-top: 8px;
+  }
+  .btn-request-info:hover { border-color: var(--text); color: var(--text); }
+
+  /* Sidebar advisory */
+  .report-sidebar { display: flex; flex-direction: column; gap: 14px; }
+  .advisory-card {
+    background: #fff5f6; border: 1px solid rgba(200,16,46,0.2);
+    border-radius: 10px; padding: 16px;
+  }
+  .advisory-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .advisory-icon { font-size: 16px; }
+  .advisory-title { font-size: 11px; font-weight: 700; color: var(--red); text-transform: uppercase; letter-spacing: 1px; }
+  .advisory-text { font-size: 12px; color: var(--text); line-height: 1.6; }
+
+  .recent-reports-sidebar { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .rrs-title { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+  .rr-item {
+    padding: 10px 0; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px;
+  }
+  .rr-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .rr-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .rr-loc { font-size: 11px; color: var(--muted); }
+  .rr-time { font-size: 10px; color: var(--muted); }
+
+  /* ── BOTTOM NAV TABS (mobile style) ── */
+  .bottom-nav {
+    display: none; position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--black); border-top: 1px solid var(--border);
+    padding: 8px 0; z-index: 100;
+  }
+
+  /* ── SCROLLING TICKER ── */
+  .ticker {
+    background: var(--red); overflow: hidden; height: 28px;
+    display: flex; align-items: center; white-space: nowrap; position: relative;
+  }
+  .ticker-inner {
+    display: inline-flex; white-space: nowrap; padding-left: 100%; animation: ticker 24s linear infinite;
+  }
+  @keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+  }
+  .ticker-item {
+    padding: 0 40px; font-size: 11px; font-weight: 600; letter-spacing: 1px;
+    color: white; text-transform: uppercase;
+  }
+  .ticker-sep { color: rgba(255,255,255,0.4); }
+
+  /* ── UTILS ── */
+  .divider { height: 1px; background: var(--border); margin: 4px 0; }
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .tag-green { background: rgba(34,197,94,0.15); color: var(--green); }
+  .tag-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+  .tag-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+  .tag-red { background: rgba(200,16,46,0.15); color: var(--red); }
+
+  .section-title {
+    font-size: 11px; font-weight: 600; letter-spacing: 1.5px; color: var(--muted);
+    text-transform: uppercase; margin-bottom: 12px;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 999;
+    background: var(--white); border: 1px solid var(--green); border-radius: 8px;
+    padding: 14px 18px; display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    transform: translateY(100px); opacity: 0; transition: all 0.3s ease;
+    max-width: 320px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast-icon { font-size: 20px; }
+
+  @media (max-width: 900px) {
+    .dashboard-layout, .safety-layout, .report-layout { grid-template-columns: 1fr; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .analytics-grid { grid-template-columns: 1fr; }
+    .dash-map { display: none; }
+    .safety-map { display: none; }
+    .report-sidebar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">
+    <div class="nav-logo">W</div>
+    <span class="nav-title">SA WildWatch</span>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showScreen('dashboard',this)">Dashboard</button>
+    <button class="nav-tab" onclick="showScreen('safety',this)">Safety Portal</button>
+    <button class="nav-tab" onclick="showScreen('analytics',this)">Analytics</button>
+    <button class="nav-tab" onclick="showScreen('report',this)">Report</button>
+  </div>
+  <div class="nav-right">
+    <button class="notif-btn">
+      🔔
+      <span class="notif-dot"></span>
+    </button>
+  </div>
+</nav>
+
+<!-- TICKER -->
+<div class="ticker" style="margin-top:56px">
+  <div class="ticker-inner" id="live-ticker"></div>
+</div>
+
+<!-- ═══════════════════════════════
+     SCREEN 1 – DASHBOARD
+═══════════════════════════════ -->
+<div id="screen-dashboard" class="screen active">
+  <div class="dashboard-layout">
+    <!-- Sidebar -->
+    <div class="dash-sidebar">
+      <div class="dash-sidebar-header">
+        <div class="dash-label">Status Summary</div>
+        <div class="dash-title">Live Incidents</div>
+      </div>
+      <div class="dash-stats">
+        <div class="stat-box alert">
+          <div class="stat-label-small">Active Extreme</div>
+          <div class="stat-num" id="extreme-count">00</div>
+        </div>
+        <div class="stat-box info">
+          <div class="stat-label-small">Resolved New</div>
+          <div class="stat-num" id="resolved-count">00</div>
+        </div>
+      </div>
+      <div class="dash-latest">
+        <span class="blink" style="color:var(--red)"> ● </span>
+        <span id="latest-sighting-text">Awaiting incident reports...</span>
+      </div>
+      <div class="incidents-list" id="incidents-list"></div>
+      <div class="dash-footer">
+        <button class="btn-new-sighting" onclick="showScreen('report', document.querySelectorAll('.nav-tab')[3])">
+          ＋ New Sighting
+        </button>
+      </div>
+    </div>
+
+    <!-- Map panel -->
+    <div class="dash-map">
+      <div class="map-header">
+        <h3>📡 Campus Incident Map — Live Feed</h3>
+        <span class="tag tag-red" id="active-incident-count">0 Active</span>
+      </div>
+      <div class="map-body">
+        <canvas id="campus-map-canvas" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
+        <div class="map-legend">
+          <div class="legend-item"><span class="legend-dot" style="background:var(--red)"></span> Extreme</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--yellow)"></span> Priority</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--blue)"></span> Informational</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span> Resolved</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     SCREEN 2 – SAFETY PORTAL
+═══════════════════════════════ -->
+<div id="screen-safety" class="screen">
+  <div class="safety-layout">
+    <div class="safety-main">
+      <!-- Hero -->
+      <div class="safety-hero">
+        <div class="safety-badge">Safety Portal</div>
+        <h1>LIVE SAFETY ASSISTANCE</h1> 
+        <p>Real-time campus wildlife monitoring, emergency guidance, and AI-assisted response coordination.</p>
+      </div>
+
+      <!-- Quick actions -->
+      <div>
+        <div class="section-title">Quick Actions</div>
+        <div class="quick-actions">
+          <button class="qa-btn danger" onclick="showScreen('report', document.querySelectorAll('.nav-tab')[3])">🚨 Report Emergency</button>
+          <button class="qa-btn">❓ Animal FAQ</button>
+          <button class="qa-btn">🏫 Campus Protocols</button>
+        </div>
+      </div>
+
+      <!-- Chatbot -->
+      <div>
+        <div class="section-title">WildWatch AI Assistant</div>
+        <div class="chat-panel">
+          <div class="chat-header">
+            <span class="chat-dot"></span>
+            WildWatch AI Assistant
+            <span style="margin-left:auto;font-size:10px;color:var(--muted)">Online</span>
+          </div>
+          <div class="chat-messages" id="chat-messages">
+            <div class="chat-msg bot">
+              <div class="msg-bubble">Safety systems are active. I am monitoring live feeds across campus. How can I assist you with SA WildWatch safety protocols today?</div>
+            </div>
+          </div>
+          <div class="chat-input-row">
+            <input class="chat-input" id="chat-input" placeholder="Type for immediate support..." onkeydown="if(event.key==='Enter')sendChat()">
+            <button class="chat-send" onclick="sendChat()">➤</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emergency contacts -->
+      <div>
+        <div class="section-title">Emergency Contacts</div>
+        <div class="emergency-card">
+          <h3>Emergency Contacts</h3>
+          <div class="emergency-contact">
+            <div class="ec-label">National Emergency Services</div>
+            <div class="ec-number">10111</div>
+          </div>
+          <div class="emergency-contact">
+            <div class="ec-label">SA Wildlife & Conservation</div>
+            <div class="ec-number">082 911 6400</div>
+          </div>
+          <div class="emergency-contact">
+            <div class="ec-label">Campus Security (24/7)</div>
+            <div class="ec-number">011 555 0199</div>
+            <div class="ec-note">Available 24/7 — Response time: avg 4 minutes</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resources -->
+      <div>
+        <div class="section-title">Safety Resources — Field Guides & Documentation</div>
+        <div class="resources-grid">
+          <div class="resource-item">
+            <span class="resource-icon">📄</span>
+            <div>
+              <div class="resource-name">Snake Safety Guide PDF</div>
+              <div class="resource-desc">Revised March 2025</div>
+            </div>
+          </div>
+          <div class="resource-item">
+            <span class="resource-icon">🗺</span>
+            <div>
+              <div class="resource-name">Sighting Hotspots</div>
+              <div class="resource-desc">Updated today</div>
+            </div>
+          </div>
+          <div class="resource-item">
+            <span class="resource-icon">🏥</span>
+            <div>
+              <div class="resource-name">First Aid Protocols</div>
+              <div class="resource-desc">Snakebite & wildlife</div>
+            </div>
+          </div>
+          <div class="resource-item">
+            <span class="resource-icon">📻</span>
+            <div>
+              <div class="resource-name">Radio Frequencies</div>
+              <div class="resource-desc">Emergency channels</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Side map -->
+    <div class="safety-map">
+      <div class="safety-map-header">🗺 Sighting Radar Map</div>
+      <div class="safety-map-body">
+        <canvas id="safety-map-canvas" style="width:100%;height:100%;"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     SCREEN 3 – ANALYTICS
+═══════════════════════════════ -->
+<div id="screen-analytics" class="screen">
+  <div class="analytics-page">
+    <div class="analytics-hero">
+      <div style="font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">System Intelligence</div>
+      <h1>Analytics Dashboard</h1>
+      <p>Real-time surveillance and historical trend analysis for SA Campus wildlife interactions. Data synthesized from verified community reports.</p>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Total Reports</div>
+        <div class="kpi-value">1,284</div>
+        <div class="kpi-sub kpi-up">▲ +9% this month</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Response Accuracy</div>
+        <div class="kpi-value">98.2%</div>
+        <div class="kpi-sub" style="color:var(--green)">✓ Verified Resolutions</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Avg Response Time</div>
+        <div class="kpi-value">14m</div>
+        <div class="kpi-sub" style="color:var(--muted)">Minutes to Triage</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Active Patrols</div>
+        <div class="kpi-value">08</div>
+        <div class="kpi-sub kpi-live"><span class="live-dot"></span> Live Monitoring</div>
+      </div>
+    </div>
+
+    <!-- Charts row -->
+    <div class="analytics-grid">
+      <!-- Animal sightings bar -->
+      <div class="analytics-card">
+        <div class="ac-title">Sightings by Animal Type</div>
+        <div class="ac-sub">Current Quarter</div>
+        <div class="bar-chart">
+          <div class="bar-row">
+            <div class="bar-label">Baboon</div>
+            <div class="bar-track"><div class="bar-fill" style="width:38%;background:var(--red)"></div></div>
+            <div class="bar-pct">38%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Puff Adder</div>
+            <div class="bar-track"><div class="bar-fill" style="width:24%;background:var(--muted)"></div></div>
+            <div class="bar-pct">24%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Leopard</div>
+            <div class="bar-track"><div class="bar-fill" style="width:18%;background:var(--yellow)"></div></div>
+            <div class="bar-pct">18%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Cape Cobra</div>
+            <div class="bar-track"><div class="bar-fill" style="width:12%;background:var(--blue)"></div></div>
+            <div class="bar-pct">12%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Other</div>
+            <div class="bar-track"><div class="bar-fill" style="width:8%;background:var(--border)"></div></div>
+            <div class="bar-pct">8%</div>
+          </div>
+        </div>
+        <div style="margin-top:16px;border-radius:6px;overflow:hidden;height:110px;background:var(--mid);position:relative;">
+          <canvas id="cougar-img-canvas" style="width:100%;height:100%;"></canvas>
+        </div>
+      </div>
+
+      <!-- Monthly trends -->
+      <div class="analytics-card">
+        <div class="ac-title">Monthly Sighting Trends</div>
+        <div class="ac-sub">Seasonal Variance Analysis</div>
+        <canvas id="monthly-chart" style="width:100%;height:160px;"></canvas>
+        <div style="display:flex;gap:12px;margin-top:8px">
+          <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)"><span style="width:12px;height:3px;background:var(--red);border-radius:2px;display:inline-block"></span>Extreme</div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)"><span style="width:12px;height:3px;background:var(--muted);border-radius:2px;display:inline-block"></span>Total</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Heatmap + Recent Reports -->
+    <div class="analytics-grid">
+      <div class="analytics-card">
+        <div class="ac-title">Incident Heatmap</div>
+        <div class="ac-sub">Campus Activity Zones</div>
+        <canvas id="heatmap-canvas" style="width:100%;height:200px;border-radius:8px;"></canvas>
+        <div class="heatmap-legend-row">
+          <div class="heatmap-legend-item"><span class="heatmap-swatch" style="background:var(--red)"></span> Extreme Density</div>
+          <div class="heatmap-legend-item"><span class="heatmap-swatch" style="background:var(--blue)"></span> Low Activity</div>
+        </div>
+      </div>
+
+      <div class="analytics-card">
+        <div class="ac-title">Recent Reports</div>
+        <div class="ac-sub">Verified Community Submissions</div>
+        <div class="reports-list" id="reports-list"></div>
+      </div>
+      <button class="btn-sm btn-ghost" style="width:100%;margin-top:12px;padding:10px;font-size:11px">
+        Download Report PDF
+      </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     SCREEN 4 – REPORT FORM
+═══════════════════════════════ -->
+<div id="screen-report" class="screen">
+  <div class="report-page">
+    <div class="report-layout">
+      <!-- Form -->
+      <div class="report-form-card">
+        <span class="report-hero-badge">Sighting Report Tool</span>
+        <h1>REPORT<br>INCIDENT</h1>
+
+        <!-- Upload -->
+        <div class="upload-zone" onclick="document.getElementById('file-input').click()">
+          <input type="file" id="file-input" style="display:none" accept="image/*,video/*" onchange="handleFileUpload(event)">
+          <div class="upload-icon">📷</div>
+          <div class="upload-text"><strong>Upload Image or Video</strong><br>Click to browse or drag & drop</div>
+        </div>
+
+        <!-- Animal classification -->
+        <div class="form-group">
+          <label class="form-label">Animal Classification</label>
+          <div class="animal-type-grid">
+            <button class="animal-type-btn" type="button" data-animal="Leopard" onclick="selectAnimal(this)">🐆 Leopard</button>
+            <button class="animal-type-btn" type="button" data-animal="Baboon" onclick="selectAnimal(this)">🐒 Baboon</button>
+            <button class="animal-type-btn" type="button" data-animal="Puff Adder" onclick="selectAnimal(this)">🐍 Puff Adder</button>
+            <button class="animal-type-btn" type="button" data-animal="Cape Cobra" onclick="selectAnimal(this)">🐍 Cape Cobra</button>
+            <button class="animal-type-btn" type="button" data-animal="Honey Badger" onclick="selectAnimal(this)">🦡 Honey Badger</button>
+            <button class="animal-type-btn" type="button" data-animal="Black-backed Jackal" onclick="selectAnimal(this)">🦊 Black-backed Jackal</button>
+          </div>
+        </div>
+
+        <!-- Location -->
+        <div class="form-group">
+          <label class="form-label">Location Description</label>
+          <input id="location-input" class="form-input" type="text" placeholder="e.g. Library East Garden, Cafeteria Back Entrance, Parking Lot C">
+        </div>
+
+        <!-- Sighting time -->
+        <div class="form-group">
+          <label class="form-label">Sighting Time</label>
+          <div class="time-grid">
+            <input id="date-input" class="form-input" type="date">
+            <input id="time-input" class="form-input" type="time">
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="description-input" class="form-textarea" placeholder="Describe animal behaviour, number of animals, direction of travel, any aggression observed..."></textarea>
+        </div>
+
+        <!-- Threat level -->
+        <div class="form-group">
+          <label class="form-label">Threat Level</label>
+          <select id="threat-level-input" class="form-select">
+            <option value="">Select threat level...</option>
+            <option>🟢 Benign — Non-threatening observation</option>
+            <option>🔵 Informational — Monitor only</option>
+            <option>🟡 Priority — Requires response</option>
+            <option>🔴 Extreme — Immediate danger</option>
+          </select>
+        </div>
+
+        <button class="btn-submit" onclick="submitReport()">➤ Assign Response Team</button>
+        <button class="btn-request-info">Request More Info</button>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="report-sidebar">
+        <div class="advisory-card">
+          <div class="advisory-header">
+            <span class="advisory-icon">⚠️</span>
+            <span class="advisory-title">Active Advisory</span>
+          </div>
+          <div class="advisory-text">
+            Increased leopard and snake activity reported within the Main Campus and Library perimeter. Exercise extreme caution near bushy or low-light areas.
+          </div>
+        </div>
+
+        <div class="recent-reports-sidebar">
+          <div class="rrs-title">Recent Reports</div>
+          <div id="recent-sidebar-reports"></div>
+        </div>
+
+        <!-- Mini map -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+          <canvas id="report-map" style="width:100%;height:180px;display:block;"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span class="toast-icon">✅</span>
+  <div>
+    <div style="font-weight:700;margin-bottom:2px">Report Submitted</div>
+    <div style="font-size:11px;color:var(--muted)">Response team has been notified.</div>
+  </div>
+</div>
+
+<script>
+// ── NAVIGATION ──
+function showScreen(id, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (id === 'analytics') setTimeout(drawCharts, 100);
+  if (id === 'dashboard') setTimeout(drawDashMap, 100);
+  if (id === 'safety') setTimeout(drawSafetyMap, 100);
+  if (id === 'report') setTimeout(drawReportMap, 100);
+}
+
+// ── DISMISS INCIDENT ──
+function dismissCard(btn) {
+  btn.closest('.incident-card').style.opacity = '0';
+  btn.closest('.incident-card').style.transform = 'translateX(-20px)';
+  setTimeout(() => btn.closest('.incident-card').remove(), 300);
+}
+
+// ── ANIMAL SELECT ──
+function selectAnimal(btn) {
+  btn.closest('.animal-type-grid').querySelectorAll('.animal-type-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+// ── FILE UPLOAD ──
+function handleFileUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const zone = document.querySelector('.upload-zone');
+  zone.innerHTML = `<div class="upload-icon">✅</div><div class="upload-text"><strong>${file.name}</strong><br>File ready to submit</div>`;
+}
+
+// ── CHAT ──
+const chatResponses = [
+  "I've logged your concern. There is an active leopard advisory near Main Campus Gate B. Please remain indoors and contact Campus Security at 011 555 0199.",
+  "For immediate wildlife emergencies, call National Emergency Services on 10111 or SA Wildlife & Conservation on 082 911 6400. Do not approach the animal.",
+  "I can see 4 active incidents on the live feed. The nearest patrol unit is 2 minutes from your location.",
+  "Baboon safety tip: Never make eye contact, do not run, and secure all food. Back away slowly and enter the nearest building.",
+  "Puff Adder alert: Freeze immediately if you spot one — they rely on camouflage and strike when stepped on. Call campus security right away.",
+  "Campus security has been notified of your location. Stay calm and remain inside a secure building until the all-clear is given."
+];
+let chatIndex = 0;
+
+function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  const messages = document.getElementById('chat-messages');
+  messages.innerHTML += `<div class="chat-msg user"><div class="msg-bubble">${msg}</div></div>`;
+  input.value = '';
+  setTimeout(() => {
+    const resp = chatResponses[chatIndex % chatResponses.length];
+    chatIndex++;
+    messages.innerHTML += `<div class="chat-msg bot"><div class="msg-bubble">${resp}</div></div>`;
+    messages.scrollTop = messages.scrollHeight;
+  }, 700);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+// ── SUBMIT REPORT ──
+async function submitReport()
+{
+  try
+  {
+    // Selected animal
+    const selectedAnimalButton = document.querySelector('.animal-type-btn.selected');
+    const animal = selectedAnimalButton?.dataset.animal || "";
+
+    // Form values
+    const location = document.getElementById('location-input').value;
+    const date = document.getElementById('date-input').value;
+    const time = document.getElementById('time-input').value;
+    const description = document.getElementById('description-input').value;
+    const threatLevel = document.getElementById('threat-level-input').value;
+
+    // Build report object
+    const reportData = { animal,
+                         location,
+                         date,
+                         time,
+                         description,
+                         threatLevel };
+    // Send POST request
+    const response = await fetch("/api/reports",
+    {
+      method: "POST",
+      headers:
+      {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(reportData)
+    });
+
+    const result = await response.json();
+
+    console.log(result);
+
+    // Check if request succeeded
+    if (!response.ok)
+    {
+      throw new Error(result.message || "Failed to submit report.");
+    }
+
+    // Show success toast
+    const toast = document.getElementById('toast');
+
+    toast.classList.add('show');
+
+    // Update/Auto-refresh after submission
+    loadReports();
+
+    setTimeout(() =>
+    {
+      toast.classList.remove('show');
+    }, 3500);
+  }//try
+  catch (error) 
+  { 
+    console.error("Error submitting report:", error);
+    
+    alert(error.message);
+  }
+}//submitReport
+
+// ── LOAD REPORTS ──
+async function loadReports()
+{
+  try
+  {
+    const response = await fetch("/api/reports");
+
+    const reports = await response.json();
+
+    // ───────────────────────────── 
+    // KPI CALCULATIONS 
+    // ───────────────────────────── 
+    const validReports = reports.filter(report => (report.animal &&
+                                                  report.location &&
+                                                  report.description &&
+                                                  report.threatLevel));
+
+    const extremeCount = validReports.filter(report => report.threatLevel.includes("Extreme")).length;
+    
+    const resolvedCount = validReports.filter(report => report.status === "Resolved").length;
+    
+    // Update dashboard
+    document.getElementById("extreme-count").textContent = extremeCount;
+    document.getElementById("resolved-count").textContent = resolvedCount;
+    // Update active incidents
+    document.getElementById( "active-incident-count" ).textContent = `${validReports.length} Active`;
+
+    // ─────────────────────────────
+    // LATEST SIGHTING
+    // ─────────────────────────────
+    if (validReports.length > 0)
+    {
+      const latestReport = validReports[0];
+
+      document.getElementById("latest-sighting-text").textContent = `Latest Report: ${latestReport.animal} spotted near ${latestReport.location} — ${latestReport.time}`;
+    }
+
+    // ─────────────────────────────
+    // LIVE INCIDENT TICKER
+    // ─────────────────────────────
+    const ticker = document.getElementById("live-ticker");
+
+    ticker.innerHTML = "";
+
+    const repeatedReports = [...validReports.slice(0, 8), ...validReports.slice(0, 8)];
+
+    repeatedReports.forEach(report =>
+    {
+      let icon = "ℹ";
+
+      if (report.threatLevel.includes("Extreme"))
+      { 
+        icon = "⚠";
+      }
+      else if (report.animal.includes("Puff Adder") || report.animal.includes("Cape Cobra"))
+      {
+        icon = "🐍";
+      }
+      else if (report.animal.includes("Leopard"))
+      {
+        icon = "🐆";
+      }
+
+      ticker.innerHTML += ` <span class="ticker-item"> ${icon} ${report.animal} reported near ${report.location} <span class="ticker-sep"> | </span> </span> `;
+    });
+
+    console.log("Loaded reports:", reports);
+
+    // Containers
+    const incidentsList = document.getElementById("incidents-list");
+
+    const reportsList = document.getElementById("reports-list");
+
+    const sidebarReports = document.getElementById("recent-sidebar-reports");
+
+    // Clear existing content
+    incidentsList.innerHTML = "";
+    reportsList.innerHTML = "";
+    sidebarReports.innerHTML = "";
+
+    // Latest reports first
+    reports.reverse();
+
+    console.log( "Filtered reports:", reports.filter(report => (report.animal &&
+                                                                report.location &&
+                                                                report.description &&
+                                                                report.threatLevel)));
+
+    reports.filter(report => (report.animal &&
+                              report.location &&
+                              report.description &&
+                              report.threatLevel)).forEach(report =>
+    {
+      // ─────────────────────────────
+      // THREAT LEVEL STYLING
+      // ─────────────────────────────
+
+      let cardClass = "informational";
+      let badgeClass = "badge-informational";
+      let tagClass = "tag-blue";
+      let shortThreat = "Informational";
+
+      if (report.threatLevel.includes("Extreme"))
+      {
+        cardClass = "extreme";
+        badgeClass = "badge-extreme";
+        tagClass = "tag-red";
+        shortThreat = "Extreme";
+      }
+      else if (report.threatLevel.includes("Priority"))
+      {
+        cardClass = "priority";
+        badgeClass = "badge-priority";
+        tagClass = "tag-yellow";
+        shortThreat = "Priority";
+      }
+      else if (report.threatLevel.includes("Benign"))
+      {
+        cardClass = "resolved";
+        badgeClass = "badge-resolved";
+        tagClass = "tag-green";
+        shortThreat = "Benign";
+      }
+
+      // ─────────────────────────────
+      // DASHBOARD INCIDENT CARD
+      // ─────────────────────────────
+
+      incidentsList.innerHTML += `
+        <div class="incident-card ${cardClass}">
+          <button class="inc-dismiss"
+            onclick="dismissCard(this)">
+            ×
+          </button>
+
+          <span class="inc-badge ${badgeClass}">
+            ${shortThreat}
+          </span>
+
+          <div class="inc-name">
+            ${report.animal}
+          </div>
+
+          <div class="inc-loc">
+            📍 ${report.location}
+          </div>
+
+          <div class="inc-actions">
+            <button class="btn-sm btn-red">
+              Deploy Alert
+            </button>
+
+            <button class="btn-sm btn-ghost">
+              Details
+            </button>
+          </div>
+        </div>
+      `;
+
+      // ─────────────────────────────
+      // ANALYTICS REPORT ITEM
+      // ─────────────────────────────
+
+      reportsList.innerHTML += `
+        <div class="report-item">
+          <div class="report-animal-icon">
+            🐾
+          </div>
+
+          <div class="report-info">
+            <div class="report-name">
+              ${report.animal}
+            </div>
+
+            <div class="report-detail">
+              ${report.description}
+            </div>
+
+            <span class="tag ${tagClass}"
+              style="margin-top:4px">
+              ${shortThreat}
+            </span>
+          </div>
+
+          <div class="report-time">
+            ${report.time}
+          </div>
+        </div>
+      `;
+
+      // ─────────────────────────────
+      // SIDEBAR REPORTS
+      // ─────────────────────────────
+
+      sidebarReports.innerHTML += `
+        <div class="rr-item">
+          <div class="rr-name">
+            🐾 ${report.animal}
+          </div>
+
+          <div class="rr-loc">
+            ${report.location}
+          </div>
+
+          <div style="
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            margin-top:4px;
+          ">
+            <span class="tag ${tagClass}">
+              ${shortThreat}
+            </span>
+
+            <span class="rr-time">
+              ${report.time}
+            </span>
+          </div>
+        </div>
+      `;
+    });
+  } catch (error)
+  {
+    console.error("Error loading reports:",error);
+  }
+}
+
+// ── CANVAS: DASHBOARD MAP ──
+function drawDashMap() {
+  const canvas = document.getElementById('campus-map-canvas');
+  if (!canvas) return;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width;
+  canvas.height = rect.height;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  // Light background gradient
+  const grad = ctx.createRadialGradient(W*0.4,H*0.4,0,W*0.5,H*0.5,W*0.7);
+  grad.addColorStop(0,'#dce8f5');
+  grad.addColorStop(1,'#c8d8ee');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,W,H);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(100,130,180,0.12)';
+  ctx.lineWidth = 1;
+  for (let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for (let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+  // Campus buildings
+  const buildings = [
+    {x:0.2,y:0.25,w:0.14,h:0.15,label:'Main Campus'},
+    {x:0.38,y:0.2,w:0.12,h:0.12,label:'Library'},
+    {x:0.55,y:0.3,w:0.14,h:0.1,label:'Cafeteria'},
+    {x:0.25,y:0.5,w:0.1,h:0.12,label:'Admin Block'},
+    {x:0.6,y:0.5,w:0.1,h:0.15,label:'Sports Hall'},
+    {x:0.4,y:0.65,w:0.14,h:0.08,label:'Parking Lot C'},
+  ];
+  buildings.forEach(b => {
+    ctx.fillStyle='rgba(180,200,230,0.8)';
+    ctx.strokeStyle='rgba(100,140,200,0.4)';
+    ctx.lineWidth=1;
+    ctx.beginPath();
+    ctx.roundRect(b.x*W,b.y*H,b.w*W,b.h*H,4);
+    ctx.fill();ctx.stroke();
+    ctx.fillStyle='rgba(40,60,100,0.6)';
+    ctx.font=`${Math.max(9,W*0.012)}px DM Sans`;
+    ctx.fillText(b.label,b.x*W+4,b.y*H+14);
+  });
+
+  // Paths
+  ctx.strokeStyle='rgba(100,130,180,0.3)';
+  ctx.lineWidth=2;
+  ctx.setLineDash([6,4]);
+  ctx.beginPath();ctx.moveTo(W*0.15,H*0.5);ctx.lineTo(W*0.85,H*0.5);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(W*0.45,H*0.1);ctx.lineTo(W*0.45,H*0.9);ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Pins
+  const pins = [
+    {x:0.22,y:0.22,color:'#C8102E',label:'Leopard',pulse:true},
+    {x:0.58,y:0.35,color:'#d97706',label:'Cape Cobra'},
+    {x:0.28,y:0.55,color:'#2563eb',label:'Baboon Troop'},
+    {x:0.62,y:0.55,color:'#16a34a',label:'Wildcat'},
+    {x:0.44,y:0.18,color:'#C8102E',label:'Puff Adder',pulse:true},
+  ];
+  const now = Date.now();
+  pins.forEach(p => {
+    const px=p.x*W,py=p.y*H;
+    if(p.pulse){
+      const r=(Math.sin(now/500)*0.3+0.7)*20;
+      ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);
+      ctx.fillStyle='rgba(200,16,46,0.12)';
+      ctx.fill();
+    }
+    ctx.beginPath();ctx.arc(px,py,7,0,Math.PI*2);
+    ctx.fillStyle=p.color;ctx.fill();
+    ctx.strokeStyle='white';ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,0.95)';
+    ctx.beginPath();ctx.roundRect(px-30,py+10,60,16,3);ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,0.1)';ctx.lineWidth=1;ctx.stroke();
+    ctx.fillStyle='#1a1d23';ctx.font='bold 9px DM Sans';ctx.textAlign='center';
+    ctx.fillText(p.label,px,py+21);ctx.textAlign='left';
+  });
+}
+
+// ── CANVAS: ANALYTICS CHARTS ──
+function drawCharts() {
+  drawMonthlyChart();
+  drawHeatmap();
+  drawCougarImg();
+}
+
+function drawMonthlyChart() {
+  const canvas = document.getElementById('monthly-chart');
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width || 400;
+  canvas.height = rect.height || 160;
+  const ctx = canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'];
+  const totals=[28,35,42,38,55,48,72,85,63,74];
+  const extremes=[4,6,8,5,12,9,18,22,14,16];
+  const maxV=Math.max(...totals)*1.1;
+  const pad={l:30,r:10,t:10,b:24};
+  const cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
+
+  // Grid
+  ctx.strokeStyle='rgba(255,255,255,0.05)';ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=pad.t+cH*(1-i/4);
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();
+  }
+
+  const bw=cW/months.length;
+  // Bars (total)
+  totals.forEach((v,i)=>{
+    const bh=cH*(v/maxV);
+    const x=pad.l+i*bw+bw*0.1, y=pad.t+cH-bh;
+    const grad=ctx.createLinearGradient(0,y,0,y+bh);
+    grad.addColorStop(0,'rgba(37,99,235,0.5)');grad.addColorStop(1,'rgba(37,99,235,0.1)');
+    ctx.fillStyle=grad;
+    ctx.beginPath();ctx.roundRect(x,y,bw*0.5,bh,2);ctx.fill();
+  });
+
+  // Extreme line
+  ctx.strokeStyle='#C8102E';ctx.lineWidth=2;ctx.setLineDash([]);
+  ctx.beginPath();
+  extremes.forEach((v,i)=>{
+    const x=pad.l+i*bw+bw*0.35;
+    const y=pad.t+cH*(1-v/maxV);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+  extremes.forEach((v,i)=>{
+    const x=pad.l+i*bw+bw*0.35, y=pad.t+cH*(1-v/maxV);
+    ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);
+    ctx.fillStyle='#C8102E';ctx.fill();
+  });
+
+  // X labels
+  ctx.fillStyle='rgba(138,143,154,0.8)';ctx.font='9px DM Sans';ctx.textAlign='center';
+  months.forEach((m,i)=>{
+    ctx.fillText(m,pad.l+i*bw+bw*0.35,H-4);
+  });
+}
+
+function drawHeatmap() {
+  const canvas = document.getElementById('heatmap-canvas');
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width||400; canvas.height=200;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+
+  // Background
+  const bg=ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,'#cddaf0');bg.addColorStop(1,'#bccde6');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+
+  // Grid
+  ctx.strokeStyle='rgba(100,130,180,0.12)';ctx.lineWidth=1;
+  for(let x=0;x<W;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+  // Hotspots
+  const spots=[
+    {x:0.2,y:0.3,r:60,intensity:0.9,color:[200,16,46]},
+    {x:0.45,y:0.2,r:45,intensity:0.7,color:[200,16,46]},
+    {x:0.7,y:0.6,r:50,intensity:0.5,color:[245,158,11]},
+    {x:0.3,y:0.7,r:35,intensity:0.4,color:[59,130,246]},
+    {x:0.8,y:0.25,r:30,intensity:0.3,color:[59,130,246]},
+  ];
+  spots.forEach(s=>{
+    const grd=ctx.createRadialGradient(s.x*W,s.y*H,0,s.x*W,s.y*H,s.r);
+    const [r,g,b]=s.color;
+    grd.addColorStop(0,`rgba(${r},${g},${b},${s.intensity})`);
+    grd.addColorStop(1,`rgba(${r},${g},${b},0)`);
+    ctx.fillStyle=grd;
+    ctx.beginPath();ctx.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);ctx.fill();
+  });
+
+  // Labels
+  ctx.fillStyle='#C8102E';ctx.font='bold 10px DM Sans';
+  ctx.fillText('▲ RED ALERT',W*0.13,H*0.18);
+  ctx.font='9px DM Sans';ctx.fillStyle='rgba(160,13,36,0.9)';
+  ctx.fillText('Leopard — Main Campus Gate B',W*0.13,H*0.28);
+}
+
+function drawCougarImg(){
+  const c=document.getElementById('cougar-img-canvas');
+  if(!c)return;
+  const r=c.getBoundingClientRect();
+  c.width=r.width||300;c.height=110;
+  const ctx=c.getContext('2d');
+  const g=ctx.createLinearGradient(0,0,c.width,c.height);
+  g.addColorStop(0,'#c8d8f0');g.addColorStop(0.5,'#e8c8c8');g.addColorStop(1,'#d0c8c0');
+  ctx.fillStyle=g;ctx.fillRect(0,0,c.width,c.height);
+  ctx.fillStyle='rgba(200,16,46,0.06)';
+  ctx.beginPath();ctx.arc(c.width*0.5,c.height*0.5,60,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(0,0,0,0.2)';ctx.font='48px serif';ctx.textAlign='center';
+  ctx.fillText('🐆',c.width*0.5,c.height*0.65);
+  ctx.fillStyle='rgba(0,0,0,0.35)';ctx.font='bold 10px DM Sans';
+  ctx.fillText('VERIFIED SIGHTING — MAIN CAMPUS GATE B',c.width*0.5,c.height-8);
+}
+
+// ── CANVAS: SAFETY MAP ──
+function drawSafetyMap() {
+  const canvas=document.getElementById('safety-map-canvas');
+  if(!canvas)return;
+  const rect=canvas.parentElement.getBoundingClientRect();
+  canvas.width=rect.width;canvas.height=rect.height;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  const bg=ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,'#d0ddf0');bg.addColorStop(1,'#c0d0e8');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(100,130,180,0.12)';ctx.lineWidth=1;
+  for(let x=0;x<W;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+  // Active zone
+  const az=ctx.createRadialGradient(W*0.5,H*0.4,0,W*0.5,H*0.4,W*0.35);
+  az.addColorStop(0,'rgba(200,16,46,0.25)');az.addColorStop(1,'rgba(200,16,46,0)');
+  ctx.fillStyle=az;ctx.beginPath();ctx.arc(W*0.5,H*0.4,W*0.35,0,Math.PI*2);ctx.fill();
+
+  // Pin
+  ctx.beginPath();ctx.arc(W*0.5,H*0.4,10,0,Math.PI*2);
+  ctx.fillStyle='#C8102E';ctx.fill();
+  ctx.strokeStyle='white';ctx.lineWidth=2;ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,0.95)';
+  ctx.beginPath();ctx.roundRect(W*0.5-65,H*0.4+14,130,18,4);ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.1)';ctx.lineWidth=1;ctx.stroke();
+  ctx.fillStyle='#C8102E';ctx.font='bold 9px DM Sans';ctx.textAlign='center';
+  ctx.fillText('ACTIVE INCIDENT: MAIN CAMPUS GATE B',W*0.5,H*0.4+26);
+}
+
+// ── CANVAS: REPORT MAP ──
+function drawReportMap() {
+  const canvas=document.getElementById('report-map');
+  if(!canvas)return;
+  const rect=canvas.getBoundingClientRect();
+  canvas.width=rect.width||360;canvas.height=180;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  const bg=ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,'#cddaf0');bg.addColorStop(1,'#bccde6');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(100,130,180,0.12)';ctx.lineWidth=1;
+  for(let x=0;x<W;x+=25){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=25){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  const g2=ctx.createRadialGradient(W*0.5,H*0.5,0,W*0.5,H*0.5,W*0.4);
+  g2.addColorStop(0,'rgba(200,16,46,0.2)');g2.addColorStop(1,'rgba(200,16,46,0)');
+  ctx.fillStyle=g2;ctx.beginPath();ctx.arc(W*0.5,H*0.5,W*0.4,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(W*0.5,H*0.5,8,0,Math.PI*2);
+  ctx.fillStyle='#C8102E';ctx.fill();
+  ctx.strokeStyle='white';ctx.lineWidth=2;ctx.stroke();
+  ctx.fillStyle='rgba(40,60,100,0.7)';ctx.font='9px DM Sans';ctx.textAlign='center';
+  ctx.fillText('Your Location',W*0.5,H*0.5+22);
+}
+
+// ── INIT ──
+window.addEventListener('load', () => {
+  drawDashMap();
+  loadReports();
+  // animate map
+  function animateMap(){
+    if(document.getElementById('screen-dashboard').classList.contains('active')){
+      drawDashMap();
+    }
+    requestAnimationFrame(animateMap);
+  }
+  animateMap();
+});
+</script>
+</body>
+</html>

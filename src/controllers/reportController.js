@@ -1,12 +1,28 @@
-import reports from "../data/reports.js";
+import Incident from "../models/Incident.js";
 
-export const getReports = (req,res) =>
+// GET all reports
+export const getReports = async (req, res) =>
 {
+  try
+  {
+    const reports = await Incident.find().sort({ reportedAt: -1 });
+
     res.json(reports);
-};
+  } catch (error)
+  {
+    res.status(500).json(
+    {
+      message: "Failed to fetch reports.",
+      error: error.message
+    });
+  }
+}; // getReports
 
-export const createReport = (req,res) =>
+// CREATE report
+export const createReport = async (req, res) =>
 {
+  try
+  {
     const { animal,
             location,
             date,
@@ -14,71 +30,85 @@ export const createReport = (req,res) =>
             description,
             threatLevel } = req.body;
 
-    if (!animal || !location || !threatLevel)
+    const newReport = await Incident.create({ animal,
+                                            location,
+                                            date,
+                                            time,
+                                            description,
+                                            threatLevel });
+
+    res.status(201).json(
     {
-        return res.status(400).json({ message: "Animal, location, and threat level are required." });
-    }
+      message: "Report created successfully.",
+      data: newReport
+    });
+  } catch (error)
+  {
+    res.status(400).json(
+    {
+      message: "Failed to create report.",
+      error: error.message
+    });
+  }
+}; //createReport
 
-    const newReport = { id: reports.length+1,
-                        animal,
-                        location,
-                        date,
-                        time,
-                        description,
-                        threatLevel,
-                        status: "Active",
-                        reportedAt: new Date() };
-
-    reports.push(newReport);
-
-    res.status(201).json({ message: "Report created successfully.",
-                           data: newReport });
-};//createReport
-
-export const updateReport = (req,res) =>
+// UPDATE report
+export const updateReport = async (req, res) =>
 {
-    const reportId = parseInt(req.params.id);
+  try
+  {
+    const updatedReport = await Incident.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        {
+          new: true,
+          runValidators: true
+        });
 
-    const report = reports.find(r => r.id === reportId);
-
-    if (!report)
+    if (!updatedReport)
     {
-        return res.status(404).json({ message: "Report not found." });
+      return res.status(404).json(
+      { message: "Report not found." });
     }
 
-    const { animal,
-            location,
-            date,
-            time,
-            description,
-            threatLevel,
-            status } = req.body;
+    res.json(
+    {
+      message: "Report updated successfully.",
+      data: updatedReport
+    });
+  } catch (error)
+  {
+    res.status(400).json(
+    {
+      message: "Failed to update report.",
+      error: error.message
+    });
+  }
+}; // updateReport
 
-    if (animal) report.animal = animal;
-    if (location) report.location = location;
-    if (date) report.date = date;
-    if (time) report.time = time;
-    if (description) report.description = description;
-    if (threatLevel) report.threatLevel = threatLevel;
-    if (status) report.status = status;
-
-    res.json({ message: "Report updated successfully.",
-               data: report });
-};//updateReport
-
-export const deleteReport = (req,res) =>
+// DELETE report
+export const deleteReport = async (req, res) =>
 {
-    const reportId = parseInt(req.params.id);
+  try
+  {
+    const deletedReport = await Incident.findByIdAndDelete(req.params.id);
 
-    const reportIndex = reports.findIndex(r => r.id === reportId);
-
-    if (reportIndex === -1)
+    if (!deletedReport)
     {
-        return res.status(404).json({ message: "Report not found." });
+      return res.status(404).json({ message: "Report not found." });
     }
 
-    const deletedReport = reports.splice(reportIndex,1);
-
-    res.json({ message: "Report deleted successfully.",
-               data: deletedReport[0] });
-};//deleteReport
+    res.json(
+    {
+      message: "Report deleted successfully.",
+      data: deletedReport
+    });
+  } catch (error)
+  {
+    res.status(500).json(
+    {
+      message: "Failed to delete report.",
+      error: error.message
+    });
+  }
+}; //deleteReport
