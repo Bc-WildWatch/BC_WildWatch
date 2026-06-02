@@ -14,15 +14,22 @@ const incidentSchema = new mongoose.Schema(
 
     enum:
     [
-      "Leopard",
-      "Baboon",
-      "Puff Adder",
-      "Cape Cobra",
-      "Honey Badger",
-      "Black-backed Jackal"
+      "Snake",
+      "Bee Swarm",
+      "Stray Dog",
+      "Lizard",
+      "Cockroach",
+      "Ant Infestation",
+      "Other"
     ],
 
     trim: true
+  },
+
+  animal_type_id:
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "animal_types",
   },
 
   location:
@@ -48,6 +55,18 @@ const incidentSchema = new mongoose.Schema(
       120,
       "Location cannot exceed 120 characters."
     ]
+  },
+
+  location_id:
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "locations"
+  },
+
+  user_id:
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "users",
   },
 
   date:

@@ -1,9 +1,8 @@
-const validAnimals = ["Leopard",
-                     "Baboon",
-                     "Puff Adder",
-                     "Cape Cobra",
-                     "Honey Badger",
-                     "Black-backed Jackal"];
+const validAnimals = ["Snake",
+                      "Bee Swarm",
+                      "Stray Dog",
+                      "Cockroach",
+                      "Other"];
 
 const validThreatLevels = ["🟢 Benign — Non-threatening observation",
                           "🔵 Informational — Monitor only",

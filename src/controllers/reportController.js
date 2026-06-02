@@ -1,4 +1,7 @@
 import Incident from "../models/Incident.js";
+import AnimalType from "../models/AnimalType.js";
+import Location from "../models/Location.js";
+import User from "../models/User.js";
 
 // GET all reports
 export const getReports = async (req, res) =>
@@ -30,8 +33,17 @@ export const createReport = async (req, res) =>
             description,
             threatLevel } = req.body;
 
+    const animalType = await AnimalType.findOne({ name: animal });
+
+    const locationDoc = await Location.findOne({ building_name: location });
+
+    const defaultUser = await User.findOne({ role: "student" });
+
     const newReport = await Incident.create({ animal,
+                                            animal_type_id:animalType?._id,
                                             location,
+                                            location_id:locationDoc?._id,
+                                            user_id:defaultUser?._id,
                                             date,
                                             time,
                                             description,
