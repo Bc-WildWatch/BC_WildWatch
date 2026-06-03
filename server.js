@@ -1,4 +1,3 @@
-// Imports
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -7,37 +6,61 @@ import { fileURLToPath } from "url";
 
 import connectDB from "./src/config/db.js";
 import reportRoutes from "./src/routes/reportRoutes.js";
+import authRoutes from "./src/routes/authRoutes.js";
+import AnimalType from "./src/models/AnimalType.js";
 
 dotenv.config();
 connectDB();
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname  = path.dirname(__filename);
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.get("/login", (req, res) =>
-{
-    res.sendFile(path.join(__dirname, "public", "login.html"));
+// ── Public config consumed by the frontend (no secrets) ──
+app.get("/api/config", (_req, res) => {
+  res.json({
+    azureClientId: process.env.AZURE_CLIENT_ID || "",
+    azureTenantId: process.env.AZURE_TENANT_ID || ""
+  });
 });
 
-// Test route
-app.get("/",(req,res) =>
-{
-    //res.send("BC-WildWatch API running.");
-    res.sendFile(path.join(__dirname, "public", "login.html"));
+// ── Animal types: pull from DB or fall back to defaults ──
+const DEFAULT_ANIMALS = [
+  { name: "Snake",           emoji: "🐍" },
+  { name: "Bee Swarm",       emoji: "🐝" },
+  { name: "Stray Dog",       emoji: "🐕" },
+  { name: "Lizard",          emoji: "🦎" },
+  { name: "Cockroach",       emoji: "🪳" },
+  { name: "Ant Infestation", emoji: "🐜" },
+  { name: "Other",           emoji: "⚠" }
+];
+
+app.get("/api/animals", async (_req, res) => {
+  try {
+    const docs = await AnimalType.find({}, "name emoji").lean();
+    const animals = docs.length > 0 ? docs : DEFAULT_ANIMALS;
+    res.json(animals);
+  } catch {
+    res.json(DEFAULT_ANIMALS);
+  }
 });
 
-// Report route
-app.use("/api/reports",reportRoutes);
+// ── Routes ──
+app.use("/api/auth",    authRoutes);
+app.use("/api/reports", reportRoutes);
 
-const PORT = 3000;
+// ── Page routes ──
+app.get("/login", (_req, res) =>
+  res.sendFile(path.join(__dirname, "public", "login.html")));
 
-app.listen(PORT,() =>
-{
-    console.log(`Server running on port ${PORT}. \nhttp://localhost:${PORT}`);
-});
+app.get("/", (_req, res) =>
+  res.sendFile(path.join(__dirname, "public", "login.html")));
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () =>
+  console.log(`Server running on port ${PORT}.\nhttp://localhost:${PORT}`));

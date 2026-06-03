@@ -3,88 +3,145 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign In | Secure Auth</title>
+  <title>Sign In | SA WildWatch</title>
   <link rel="stylesheet" href="login.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
 </head>
 <body>
-  <div class="page">
-    <aside class="brand-panel" aria-hidden="true">
-      <div class="brand-content">
-        <div class="brand-logo" aria-hidden="true">
-          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="48" height="48" rx="12" fill="currentColor" fill-opacity="0.15"/>
-            <path d="M24 14c-4.4 0-8 3.1-8 7v2h16v-2c0-3.9-3.6-7-8-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <rect x="14" y="23" width="20" height="14" rx="3" stroke="currentColor" stroke-width="2"/>
-            <circle cx="24" cy="30" r="2" fill="currentColor"/>
-          </svg>
+
+  <div class="bg-overlay"></div>
+
+  <main class="page-center">
+    <div class="login-card">
+
+      <!-- Brand header -->
+      <div class="brand-header">
+        <div class="brand-logo">W</div>
+        <div class="brand-text">
+          <div class="brand-name">SA WILDWATCH</div>
+          <div class="brand-sub">CAMPUS WILDLIFE SAFETY SYSTEM</div>
         </div>
-        <h1>Secure access</h1>
-        <p>Passwords are hashed before storage. Accounts stay on this device only.</p>
       </div>
-    </aside>
 
-    <main class="auth-panel">
-     
-      <section id="auth-section" class="card">
-        <header class="card-header">
-          <h2 id="form-title">Welcome back</h2>
-          <p id="form-subtitle">Sign in to your account</p>
-        </header>
-
-        <div class="tabs" role="tablist" aria-label="Authentication mode">
-          <button type="button" class="tab active" id="tab-login" role="tab" aria-selected="true" aria-controls="login-form">Log in</button>
-          <button type="button" class="tab" id="tab-signup" role="tab" aria-selected="false" aria-controls="signup-form">Create account</button>
+      <!-- Stats row -->
+      <div class="stats-row">
+        <div class="stat-item">
+          <div class="stat-value red">24/7</div>
+          <div class="stat-label">MONITORING</div>
         </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-value red">4M</div>
+          <div class="stat-label">AVG RESPONSE</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-value red">SA</div>
+          <div class="stat-label">WILDLIFE DATA</div>
+        </div>
+      </div>
 
-        <div id="message" class="message" role="alert" hidden></div>
+      <!-- Heading -->
+      <div class="secure-heading">SECURE ACCESS</div>
+      <p class="secure-desc">
+        Sign in with your institutional Microsoft account or your email and password.
+      </p>
 
-        <form id="login-form" class="form active" novalidate>
-          <div class="field">
-            <label for="login-email">Email</label>
-            <input type="email" id="login-email" name="email" autocomplete="email" required placeholder="you@example.com">
-          </div>
-          <div class="field">
-            <label for="login-password">Password</label>
-            <div class="password-wrap">
-              <input type="password" id="login-password" name="password" autocomplete="current-password" required placeholder="Your password" minlength="8">
-              <button type="button" class="toggle-password" data-target="login-password" aria-label="Show password">Show</button>
-            </div>
-          </div>
-          <button type="submit" class="btn btn-primary">Sign in</button>
-        </form>
+      <!-- Alert message -->
+      <div id="message" class="message" role="alert" hidden></div>
 
-        <form id="signup-form" class="form" novalidate hidden>
-          <div class="field">
-            <label for="signup-name">Full name</label>
-            <input type="text" id="signup-name" name="name" autocomplete="name" required placeholder="Jane Doe" minlength="2" maxlength="80">
+      <!-- Microsoft SSO -->
+      <button id="btn-microsoft" class="btn-ms" type="button">
+        <svg width="20" height="20" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+          <rect x="1"  y="1"  width="9" height="9" fill="#f25022"/>
+          <rect x="11" y="1"  width="9" height="9" fill="#7fba00"/>
+          <rect x="1"  y="11" width="9" height="9" fill="#00a4ef"/>
+          <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
+        </svg>
+        Sign in with Microsoft
+      </button>
+
+      <!-- Divider -->
+      <div class="or-divider"><span>or</span></div>
+
+      <!-- Login / Register tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login"  onclick="setMode('login')">Log in</button>
+        <button class="auth-tab"        id="tab-signup" onclick="setMode('signup')">Create account</button>
+      </div>
+
+      <!-- ── Login form ── -->
+      <form id="login-form" novalidate>
+        <div class="field">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" autocomplete="email" required placeholder="you@example.com">
+        </div>
+        <div class="field">
+          <label for="login-password">Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="login-password" autocomplete="current-password" required placeholder="Your password" minlength="8">
+            <button type="button" class="pw-toggle" data-target="login-password">Show</button>
           </div>
-          <div class="field">
-            <label for="signup-email">Email</label>
-            <input type="email" id="signup-email" name="email" autocomplete="email" required placeholder="you@example.com">
+        </div>
+        <button type="submit" class="btn-email" id="login-btn">Sign in</button>
+      </form>
+
+      <!-- ── Register form ── -->
+      <form id="signup-form" style="display:none" novalidate>
+        <div class="field">
+          <label for="signup-name">Full name</label>
+          <input type="text" id="signup-name" autocomplete="name" required placeholder="Jane Doe" minlength="2" maxlength="80">
+        </div>
+        <div class="field">
+          <label for="signup-email">Email</label>
+          <input type="email" id="signup-email" autocomplete="email" required placeholder="you@example.com">
+        </div>
+        <div class="field">
+          <label for="signup-password">Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="signup-password" autocomplete="new-password" required placeholder="Min 8 chars, 1 uppercase, 1 number" minlength="8">
+            <button type="button" class="pw-toggle" data-target="signup-password">Show</button>
           </div>
-          <div class="field">
-            <label for="signup-password">Password</label>
-            <div class="password-wrap">
-              <input type="password" id="signup-password" name="password" autocomplete="new-password" required placeholder="At least 8 characters" minlength="8">
-              <button type="button" class="toggle-password" data-target="signup-password" aria-label="Show password">Show</button>
-            </div>
-            <p class="hint">Must be at least 8 characters.</p>
+          <div class="strength-wrap">
+            <div class="strength-track"><div class="strength-bar" id="strength-meter"></div></div>
+            <span class="strength-label" id="strength-label"></span>
           </div>
-          <div class="field">
-            <label for="signup-confirm">Confirm password</label>
-            <div class="password-wrap">
-              <input type="password" id="signup-confirm" name="confirm" autocomplete="new-password" required placeholder="Repeat password" minlength="8">
-              <button type="button" class="toggle-password" data-target="signup-confirm" aria-label="Show password">Show</button>
-            </div>
+        </div>
+        <div class="field">
+          <label for="signup-confirm">Confirm password</label>
+          <div class="pw-wrap">
+            <input type="password" id="signup-confirm" autocomplete="new-password" required placeholder="Repeat password">
+            <button type="button" class="pw-toggle" data-target="signup-confirm">Show</button>
           </div>
-          <button type="submit" class="btn btn-primary">Create account</button>
-        </form>
-      </section>
-    </main>
-  </div>
+        </div>
+        <button type="submit" class="btn-email" id="signup-btn">Create account</button>
+      </form>
+
+      <!-- System info -->
+      <div class="sysinfo-divider">
+        <span>SYSTEM INFO</span>
+      </div>
+
+      <ul class="sysinfo-list">
+        <li><span class="si-icon">🔒</span><span>Secured via Microsoft Entra ID (Azure AD)</span></li>
+        <li><span class="si-icon">🏫</span><span>Belgium Campus ITversity — Pretoria</span></li>
+        <li><span class="si-icon">🐾</span><span>SA Wildlife Incident Management v2.0</span></li>
+      </ul>
+
+      <!-- Footer -->
+      <p class="disclaimer">
+        By signing in you agree to the Campus Safety Data Policy.<br>
+        Unauthorised access is prohibited. All sessions are logged.<br>
+        <span class="disclaimer-contacts">
+          Emergency: <strong>10111</strong> &nbsp;|&nbsp; Campus Security: <strong>011 555 0199</strong>
+        </span>
+      </p>
+
+    </div>
+  </main>
 
   <script src="login.js"></script>
 </body>

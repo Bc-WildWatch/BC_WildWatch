@@ -34,21 +34,23 @@ export const createReport = async (req, res) =>
             description,
             threatLevel } = req.body;
 
-    const animalType = await AnimalType.findOne({ name: animal });
-
+    const animalType  = await AnimalType.findOne({ name: animal });
     const locationDoc = await Location.findOne({ building_name: location });
 
-    const defaultUser = await User.findOne({ role: "student" });
+    // Use the authenticated user from the JWT (set by requireAuth middleware)
+    const userId = req.user?.id;
 
-    const newReport = await Incident.create({ animal,
-                                            animal_type_id:animalType?._id,
-                                            location,
-                                            location_id:locationDoc?._id,
-                                            user_id:defaultUser?._id,
-                                            date,
-                                            time,
-                                            description,
-                                            threatLevel });
+    const newReport = await Incident.create({
+      animal,
+      animal_type_id: animalType?._id,
+      location,
+      location_id:   locationDoc?._id,
+      user_id:       userId,
+      date,
+      time,
+      description,
+      threatLevel
+    });
 
     try
     {

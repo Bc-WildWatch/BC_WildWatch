@@ -1,134 +1,80 @@
-const validAnimals = ["Snake",
-                      "Bee Swarm",
-                      "Stray Dog",
-                      "Cockroach",
-                      "Other"];
+const STANDARD_ANIMALS = ["Snake", "Bee Swarm", "Stray Dog", "Cockroach", "Lizard", "Ant Infestation", "Other"];
 
-const validThreatLevels = ["🟢 Benign — Non-threatening observation",
-                          "🔵 Informational — Monitor only",
-                          "🟡 Priority — Requires response",
-                          "🔴 Extreme — Immediate danger"];
+const VALID_THREAT_LEVELS = [
+  "🟢 Benign — Non-threatening observation",
+  "🔵 Informational — Monitor only",
+  "🟡 Priority — Requires response",
+  "🔴 Extreme — Immediate danger"
+];
 
-const validateReport = (req, res, next) =>
-{
-  let { animal,
-        location,
-        date,
-        time,
-        description,
-        threatLevel } = req.body;
+const validateReport = (req, res, next) => {
+  let { animal, location, date, time, description, threatLevel } = req.body;
 
-  // ─────────────────────────────
-  // SANITIZATION
-  // ─────────────────────────────
-
-  animal = animal?.trim();
-  location = location?.trim();
-  date = date?.trim();
-  time = time?.trim();
+  // Sanitize
+  animal      = animal?.trim();
+  location    = location?.trim();
+  date        = date?.trim();
+  time        = time?.trim();
   description = description?.trim();
   threatLevel = threatLevel?.trim();
 
-  // Save cleaned values back
-  req.body = { animal,
-             location,
-             date,
-             time,
-             description,
-             threatLevel };
+  req.body = { animal, location, date, time, description, threatLevel };
 
-  // ─────────────────────────────
-  // REQUIRED FIELD VALIDATION
-  // ─────────────────────────────
-
-  if (!animal ||
-     !location ||
-     !date ||
-     !time ||
-     !description ||
-     !threatLevel)
-  {
-    return res.status(400).json({ message:"All report fields are required." });
+  // Required fields
+  if (!animal || !location || !date || !time || !description || !threatLevel) {
+    return res.status(400).json({ message: "All report fields are required." });
   }
 
-  // ─────────────────────────────
-  // ANIMAL VALIDATION
-  // ─────────────────────────────
-
-  if (!validAnimals.includes(animal))
-  {
-    return res.status(400).json({ message: "Invalid animal selection." });
+  // Animal: allow standard types or any custom non-empty string (max 80 chars)
+  if (animal.length > 80) {
+    return res.status(400).json({ message: "Animal name must be 80 characters or fewer." });
+  }
+  const animalRegex = /^[a-zA-Z0-9\s\-'().]+$/;
+  if (!animalRegex.test(animal)) {
+    return res.status(400).json({ message: "Animal name contains invalid characters." });
   }
 
-  // ─────────────────────────────
-  // THREAT LEVEL VALIDATION
-  // ─────────────────────────────
-
-  if (!validThreatLevels.includes(threatLevel))
-  {
+  // Threat level
+  if (!VALID_THREAT_LEVELS.includes(threatLevel)) {
     return res.status(400).json({ message: "Invalid threat level selection." });
   }
 
-  // ─────────────────────────────
-  // LOCATION VALIDATION
-  // ─────────────────────────────
-
-  if (location.length < 5 || location.length > 120)
-  {
+  // Location
+  if (location.length < 5 || location.length > 120) {
     return res.status(400).json({ message: "Location must be between 5 and 120 characters." });
   }
-
-  // Campus-safe characters only
   const locationRegex = /^[a-zA-Z0-9\s.,\-()]+$/;
-
-  if (!locationRegex.test(location))
-  {
+  if (!locationRegex.test(location)) {
     return res.status(400).json({ message: "Location contains invalid characters." });
   }
 
-  // ─────────────────────────────
-  // DESCRIPTION VALIDATION
-  // ─────────────────────────────
-
-  if (description.length < 15 || description.length > 500)
-  {
+  // Description
+  if (description.length < 15 || description.length > 500) {
     return res.status(400).json({ message: "Description must be between 15 and 500 characters." });
   }
 
-  // ─────────────────────────────
-  // DATE VALIDATION
-  // ─────────────────────────────
-
-  // Convert DD/MM/YYYY → YYYY-MM-DD 
-  const parts = date.split("/");
-  
-  const formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
-  const submittedDate = new Date(formattedDate);
+  // Date — accept both YYYY-MM-DD (HTML input) and DD/MM/YYYY
+  let parsedDate;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    parsedDate = new Date(date);
+  } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
+    const [d, m, y] = date.split("/");
+    parsedDate = new Date(`${y}-${m}-${d}`);
+  } else {
+    return res.status(400).json({ message: "Invalid date format. Use YYYY-MM-DD." });
+  }
 
   const today = new Date();
-
-  // Remove time component
   today.setHours(0, 0, 0, 0);
-
-  if (submittedDate > today)
-  {
+  if (parsedDate > today) {
     return res.status(400).json({ message: "Incident date cannot be in the future." });
   }
 
-  // ─────────────────────────────
-  // TIME VALIDATION
-  // ─────────────────────────────
-
+  // Time — HH:MM 24-hour
   const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
-
-  if (!timeRegex.test(time))
-  {
-    return res.status(400).json({ message: "Invalid time format." });
+  if (!timeRegex.test(time)) {
+    return res.status(400).json({ message: "Invalid time format. Use HH:MM (24-hour)." });
   }
-
-  // ─────────────────────────────
-  // PASSED VALIDATION
-  // ─────────────────────────────
 
   next();
 };
