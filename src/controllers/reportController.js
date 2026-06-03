@@ -2,6 +2,7 @@ import Incident from "../models/Incident.js";
 import AnimalType from "../models/AnimalType.js";
 import Location from "../models/Location.js";
 import User from "../models/User.js";
+import { postToTeams } from "../utils/teamsNotifier.js";
 
 // GET all reports
 export const getReports = async (req, res) =>
@@ -48,6 +49,14 @@ export const createReport = async (req, res) =>
                                             time,
                                             description,
                                             threatLevel });
+
+    try
+    {
+      await postToTeams(newReport);
+    } catch (error)
+    {
+      console.error(error);
+    }
 
     res.status(201).json(
     {
