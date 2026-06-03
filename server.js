@@ -20,10 +20,16 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
+app.get("/login", (req, res) =>
+{
+    res.sendFile(path.join(__dirname, "public", "login.html"));
+});
+
 // Test route
 app.get("/",(req,res) =>
 {
-    res.send("BC-WildWatch API running.");
+    //res.send("BC-WildWatch API running.");
+    res.sendFile(path.join(__dirname, "public", "login.html"));
 });
 
 // Report route

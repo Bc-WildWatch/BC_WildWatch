@@ -6,6 +6,13 @@
 <title>SA WildWatch</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<script>
+if (!sessionStorage.getItem("currentUser"))
+{
+    window.location.href = "/login";
+}
+</script>
 <style>
   :root {
     --red: #C8102E;
@@ -555,10 +562,8 @@
     <button class="nav-tab" onclick="showScreen('report',this)">Report</button>
   </div>
   <div class="nav-right">
-    <button class="notif-btn">
-      🔔
-      <span class="notif-dot"></span>
-    </button>
+    <span id="logged-user"></span>
+    <button class="notif-btn" onclick="logout()" title="Logout">🚪</button>
   </div>
 </nav>
 
@@ -946,6 +951,14 @@
 </div>
 
 <script>
+function logout()
+{
+  sessionStorage.clear();
+  //sessionStorage.removeItem("currentUser");
+  //sessionStorage.removeItem("auth_session");
+  window.location.href = "/login";
+}
+
 // ── NAVIGATION ──
 function showScreen(id, btn) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -988,33 +1001,6 @@ function handleFileUpload(e) {
   if (!file) return;
   const zone = document.querySelector('.upload-zone');
   zone.innerHTML = `<div class="upload-icon">✅</div><div class="upload-text"><strong>${file.name}</strong><br>File ready to submit</div>`;
-}
-
-// ── CHAT ──
-const chatResponses = [
-  "I've logged your concern. There is an active leopard advisory near Main Campus Gate B. Please remain indoors and contact Campus Security at 011 555 0199.",
-  "For immediate wildlife emergencies, call National Emergency Services on 10111 or SA Wildlife & Conservation on 082 911 6400. Do not approach the animal.",
-  "I can see 4 active incidents on the live feed. The nearest patrol unit is 2 minutes from your location.",
-  "Baboon safety tip: Never make eye contact, do not run, and secure all food. Back away slowly and enter the nearest building.",
-  "Puff Adder alert: Freeze immediately if you spot one — they rely on camouflage and strike when stepped on. Call campus security right away.",
-  "Campus security has been notified of your location. Stay calm and remain inside a secure building until the all-clear is given."
-];
-let chatIndex = 0;
-
-function sendChat() {
-  const input = document.getElementById('chat-input');
-  const msg = input.value.trim();
-  if (!msg) return;
-  const messages = document.getElementById('chat-messages');
-  messages.innerHTML += `<div class="chat-msg user"><div class="msg-bubble">${msg}</div></div>`;
-  input.value = '';
-  setTimeout(() => {
-    const resp = chatResponses[chatIndex % chatResponses.length];
-    chatIndex++;
-    messages.innerHTML += `<div class="chat-msg bot"><div class="msg-bubble">${resp}</div></div>`;
-    messages.scrollTop = messages.scrollHeight;
-  }, 700);
-  messages.scrollTop = messages.scrollHeight;
 }
 
 // ── SUBMIT REPORT ──
