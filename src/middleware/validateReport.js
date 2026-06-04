@@ -55,8 +55,14 @@ const validateReport = (req, res, next) => {
 
   // Date — accept both YYYY-MM-DD (HTML input) and DD/MM/YYYY
   let parsedDate;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    parsedDate = new Date(date);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(date))
+  {
+    const [year, month, day] = date.split("-");
+
+    parsedDate = new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day));
   } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
     const [d, m, y] = date.split("/");
     parsedDate = new Date(`${y}-${m}-${d}`);
