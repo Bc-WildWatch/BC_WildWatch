@@ -8,17 +8,18 @@ const VALID_THREAT_LEVELS = [
 ];
 
 const validateReport = (req, res, next) => {
-  let { animal, location, date, time, description, threatLevel } = req.body;
+  let { animal, customAnimal, location, date, time, description, threatLevel } = req.body;
 
   // Sanitize
   animal      = animal?.trim();
+  customAnimal = customAnimal?.trim();
   location    = location?.trim();
   date        = date?.trim();
   time        = time?.trim();
   description = description?.trim();
   threatLevel = threatLevel?.trim();
 
-  req.body = { animal, location, date, time, description, threatLevel };
+  req.body = { animal, customAnimal, location, date, time, description, threatLevel };
 
   // Required fields
   if (!animal || !location || !date || !time || !description || !threatLevel) {
@@ -32,6 +33,25 @@ const validateReport = (req, res, next) => {
   const animalRegex = /^[a-zA-Z0-9\s\-'().]+$/;
   if (!animalRegex.test(animal)) {
     return res.status(400).json({ message: "Animal name contains invalid characters." });
+  }
+
+  // If "Other" is selected, require a custom animal name
+  if (animal === "Other")
+  {
+    if (!customAnimal)
+    {
+      return res.status(400).json({ message: "Please specify the animal." });
+    }
+
+    if (customAnimal.length > 80)
+    {
+      return res.status(400).json({ message: "Custom animal name must be 80 characters or fewer." });
+    }
+
+    if (!animalRegex.test(customAnimal))
+    {
+      return res.status(400).json({ message: "Custom animal name contains invalid characters." });
+    }
   }
 
   // Threat level

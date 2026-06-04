@@ -28,6 +28,7 @@ export const createReport = async (req, res) =>
   try
   {
     const { animal,
+            customAnimal,
             location,
             date,
             time,
@@ -42,6 +43,7 @@ export const createReport = async (req, res) =>
 
     const newReport = await Incident.create({
       animal,
+      ...(customAnimal ? { customAnimal } : {}),
       animal_type_id: animalType?._id,
       location,
       location_id:   locationDoc?._id,

@@ -24,6 +24,12 @@ const incidentSchema = new mongoose.Schema(
     trim: true
   },
 
+  customAnimal:
+  {
+    type: String,
+    trim: true,
+  },
+
   animal_type_id:
   {
     type: mongoose.Schema.Types.ObjectId,

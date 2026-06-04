@@ -665,8 +665,8 @@ async function loadAnimals() {
 // ── SUBMIT REPORT 
 async function submitReport() {
   const selectedBtn = document.querySelector(".animal-type-btn.selected");
-  let animal = selectedBtn?.dataset.animal || "";
-  if (animal === "Other") animal = document.getElementById("other-animal-input").value.trim();
+  const animal = selectedBtn?.dataset.animal || "";
+  const customAnimal = animal === "Other" ? document.getElementById("other-animal-input").value.trim() : undefined;
 
   const location    = document.getElementById("location-input").value;
   const date        = document.getElementById("date-input").value;
@@ -678,7 +678,7 @@ async function submitReport() {
     const res    = await fetch("/api/reports", {
       method:  "POST",
       headers: authHeaders(),
-      body:    JSON.stringify({ animal, location, date, time, description, threatLevel })
+      body:    JSON.stringify({ animal, customAnimal, location, date, time, description, threatLevel })
     });
     const result = await res.json();
 
