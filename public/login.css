@@ -12,17 +12,18 @@
   --font:       'DM Sans', system-ui, sans-serif;
 }
 
-html { -webkit-font-smoothing: antialiased; }
+html {
+  -webkit-font-smoothing: antialiased;
+  /* allow the page to scroll when the card is taller than the viewport */
+  overflow-y: auto;
+}
 
 body {
   font-family: var(--font);
   background: var(--bg);
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 /* Subtle radial glow behind card */
@@ -39,8 +40,9 @@ body {
   position: relative;
   z-index: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-start;   /* don't clip — let card grow downward */
   justify-content: center;
+  min-height: 100vh;
   padding: 24px;
   width: 100%;
 }
@@ -50,10 +52,11 @@ body {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 16px;
-  padding: 36px 32px 28px;
+  padding: 24px 28px 24px;   /* reduced from 36px top/28px bottom */
   width: 100%;
   max-width: 440px;
   box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(200,16,46,0.1);
+  margin: auto 0;            /* vertical centering when content is short */
 }
 
 /* ── Brand header ── */
@@ -61,7 +64,7 @@ body {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-bottom: 28px;
+  margin-bottom: 16px;
 }
 
 .brand-logo {
@@ -101,8 +104,8 @@ body {
   background: rgba(0,0,0,0.3);
   border: 1px solid var(--divider);
   border-radius: 10px;
-  padding: 14px 10px;
-  margin-bottom: 28px;
+  padding: 10px 8px;
+  margin-bottom: 16px;
   gap: 0;
 }
 
@@ -137,18 +140,18 @@ body {
 /* ── Heading ── */
 .secure-heading {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 52px;
+  font-size: 44px;
   letter-spacing: 2px;
   color: var(--text);
   line-height: 1;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .secure-desc {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--muted);
-  line-height: 1.6;
-  margin-bottom: 24px;
+  line-height: 1.5;
+  margin-bottom: 16px;
 }
 
 /* ── Message ── */
@@ -168,18 +171,18 @@ body {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  padding: 14px 20px;
+  padding: 11px 20px;
   background: #ffffff;
   color: #1a1a1a;
   border: none;
   border-radius: 8px;
   font-family: var(--font);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
   box-shadow: 0 2px 12px rgba(0,0,0,0.3);
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .btn-ms:hover {
@@ -223,7 +226,7 @@ body {
   background: rgba(0,0,0,0.3);
   padding: 4px;
   border-radius: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 .auth-tab {
   flex: 1;
@@ -243,7 +246,7 @@ body {
 
 /* ── Email form fields ── */
 .field {
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 .field label {
   display: block;
@@ -354,7 +357,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 20px 0 14px;
+  margin: 14px 0 10px;
 }
 .sysinfo-divider::before,
 .sysinfo-divider::after {
@@ -376,8 +379,8 @@ body {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 22px;
+  gap: 6px;
+  margin-bottom: 14px;
 }
 
 .sysinfo-list li {
@@ -408,3 +411,39 @@ body {
 }
 
 .disclaimer-contacts strong { color: var(--text); }
+
+/* ── Hint text ── */
+.hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 5px;
+}
+
+/* ── Role hint badge ── */
+.role-hint {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--red);
+  background: rgba(200,16,46,0.12);
+  border: 1px solid rgba(200,16,46,0.3);
+  padding: 1px 7px;
+  border-radius: 4px;
+  margin-left: 8px;
+  text-transform: uppercase;
+}
+
+/* ── Responsive: smaller screens ── */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 24px 18px 20px;
+    border-radius: 12px;
+  }
+  .secure-heading { font-size: 38px; }
+  .brand-logo { width: 42px; height: 42px; font-size: 20px; }
+  .brand-name { font-size: 18px; letter-spacing: 2px; }
+  .stats-row  { padding: 10px 6px; }
+  .stat-value { font-size: 20px; }
+  .stat-label { font-size: 7px; }
+  .stat-divider { height: 28px; }
+}

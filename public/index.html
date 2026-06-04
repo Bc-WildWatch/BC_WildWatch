@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <script>
-  // ── Auth guard ──────────────────────────────────────────────────────────────
+  // ── Authentication guard
   const __jwt  = sessionStorage.getItem("jwt");
   const __user = JSON.parse(sessionStorage.getItem("currentUser") || "null");
   if (!__jwt || !__user) window.location.href = "/login";
@@ -36,15 +36,16 @@
   body { font-family:'DM Sans',sans-serif; background:var(--page-bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
 
   /* ── NAV ── */
-  .nav { position:fixed;top:0;left:0;right:0;z-index:100; display:flex;align-items:center;justify-content:space-between; padding:0 24px;height:56px; background:var(--nav-bg); border-bottom:1px solid rgba(255,255,255,0.08); }
-  .nav-brand { display:flex;align-items:center;gap:10px; }
+  .nav { position:fixed;top:0;left:0;right:0;z-index:100; display:flex;align-items:center; padding:0 16px;height:56px; background:var(--nav-bg); border-bottom:1px solid rgba(255,255,255,0.08);gap:12px; }
+  .nav-brand { display:flex;align-items:center;gap:10px;flex-shrink:0; }
   .nav-logo { width:32px;height:32px;background:var(--red); display:flex;align-items:center;justify-content:center; font-family:'Bebas Neue',sans-serif;font-size:18px;color:white; clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%); }
   .nav-title { font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:#ffffff; }
-  .nav-tabs { display:flex;gap:2px; }
-  .nav-tab { padding:6px 16px;font-size:12px;font-weight:500;letter-spacing:0.5px; border:none;background:transparent;color:rgba(255,255,255,0.55);cursor:pointer; border-radius:4px;transition:all 0.2s;text-transform:uppercase; }
+  .nav-tabs { display:flex;gap:2px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none; }
+  .nav-tabs::-webkit-scrollbar { display:none; }
+  .nav-tab { padding:6px 14px;font-size:12px;font-weight:500;letter-spacing:0.5px;white-space:nowrap; border:none;background:transparent;color:rgba(255,255,255,0.55);cursor:pointer; border-radius:4px;transition:all 0.2s;text-transform:uppercase;flex-shrink:0; }
   .nav-tab:hover { color:#ffffff;background:rgba(255,255,255,0.1); }
   .nav-tab.active { color:#ffffff;background:var(--red); }
-  .nav-right { display:flex;align-items:center;gap:10px; }
+  .nav-right { display:flex;align-items:center;gap:8px;flex-shrink:0; }
   .nav-user { font-size:12px;color:rgba(255,255,255,0.7); }
   .role-badge { font-size:9px;font-weight:700;letter-spacing:1.5px;padding:2px 8px;border-radius:3px;text-transform:uppercase; }
   .role-badge.admin { background:var(--red);color:white; }
@@ -53,17 +54,17 @@
   .logout-btn:hover { border-color:var(--red);color:white;background:var(--red); }
 
   /* ── SCREENS ── */
-  .screen { display:none;padding-top:56px;min-height:100vh; }
+  /* padding-top:0 — the ticker (28px) sits between the fixed nav and screens
+     in normal flow, so screens already start at nav+ticker = 84px from top */
+  .screen { display:none;padding-top:0;min-height:100vh; }
   .screen.active { display:block; }
 
-  /* ════════════════════════════════
-     SCREEN 1 – DASHBOARD
-  ════════════════════════════════ */
-  .dashboard-layout { display:grid;grid-template-columns:340px 1fr;gap:0;height:calc(100vh - 56px); }
+  /* SCREEN 1 – DASHBOARD*/
+  .dashboard-layout { display:grid;grid-template-columns:360px 1fr;gap:0;height:calc(100vh - 84px); }
   .dash-sidebar { background:var(--white);border-right:1px solid var(--border); display:flex;flex-direction:column;overflow:hidden;min-height:0; }
-  .dash-sidebar-header { padding:20px 20px 16px;border-bottom:1px solid var(--border); }
-  .dash-label { font-size:10px;font-weight:600;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px; }
-  .dash-title { font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--text); }
+  .dash-sidebar-header { padding:10px 20px 12px;border-bottom:1px solid var(--border); }
+  .dash-label { font-size:10px;font-weight:600;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:4px; }
+  .dash-title { font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--text); }
   .dash-stats { display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 20px;border-bottom:1px solid var(--border); }
   .stat-box { background:var(--mid);border-radius:6px;padding:12px; }
   .stat-box.alert { border-left:3px solid var(--red); }
@@ -80,7 +81,7 @@
   .incidents-list::-webkit-scrollbar { width:4px; }
   .incidents-list::-webkit-scrollbar-thumb { background:var(--border);border-radius:2px; }
 
-  .incident-card { background:var(--white);border:1px solid var(--border);border-radius:8px;padding:14px 14px 12px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+  .incident-card { background:var(--white);border:1px solid var(--border);border-radius:8px;padding:12px 12px 10px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);flex-shrink:0; }
   .incident-card:hover { border-color:var(--red);transform:translateX(2px);box-shadow:0 2px 8px rgba(200,16,46,0.1); }
   .incident-card::before { content:'';position:absolute;left:0;top:0;bottom:0;width:3px; }
   .incident-card.extreme::before      { background:var(--red); }
@@ -94,10 +95,11 @@
   .badge-informational{ background:var(--blue);color:white; }
   .badge-resolved     { background:rgba(34,197,94,0.2);color:var(--green);border:1px solid var(--green); }
 
-  .inc-name { font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px; }
-  .inc-loc  { font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px; }
-  .inc-actions { display:flex;gap:6px;margin-top:10px;flex-wrap:wrap; }
-  .btn-sm { padding:5px 12px;font-size:10px;font-weight:600;letter-spacing:0.5px;border-radius:4px;border:none;cursor:pointer;text-transform:uppercase;transition:all 0.15s; }
+  .inc-name { font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px;padding-right:28px; }
+  .inc-loc  { font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%; }
+  .inc-time { font-size:10px;color:var(--muted);margin-top:2px; }
+  .inc-actions { display:flex;gap:5px;margin-top:8px;flex-wrap:nowrap;align-items:center;overflow:hidden; }
+  .btn-sm { padding:4px 10px;font-size:10px;font-weight:600;letter-spacing:0.5px;border-radius:4px;border:none;cursor:pointer;text-transform:uppercase;transition:all 0.15s;white-space:nowrap;flex-shrink:0; }
   .btn-red   { background:var(--red);color:white; }
   .btn-red:hover { background:var(--red-dark); }
   .btn-green { background:var(--green);color:white; }
@@ -123,10 +125,8 @@
   .legend-item { display:flex;align-items:center;gap:6px;margin-bottom:5px; }
   .legend-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0; }
 
-  /* ════════════════════════════════
-     SCREEN 2 – SAFETY PORTAL
-  ════════════════════════════════ */
-  .safety-layout { display:grid;grid-template-columns:1fr 320px;gap:0;min-height:calc(100vh - 56px); }
+  /* SCREEN 2 – SAFETY PORTAL*/
+  .safety-layout { display:grid;grid-template-columns:1fr 320px;gap:0;min-height:calc(100vh - 84px); }
   .safety-main { padding:24px;display:flex;flex-direction:column;gap:20px;background:var(--page-bg);overflow-y:auto; }
   .safety-hero { background:var(--white);border:1px solid var(--border);border-radius:10px;padding:20px 24px;position:relative;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06); }
   .safety-hero::before { content:'';position:absolute;right:-40px;top:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(200,16,46,0.15) 0%,transparent 70%);border-radius:50%; }
@@ -158,10 +158,10 @@
   .chat-header { padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text); }
   .chat-dot { width:8px;height:8px;background:var(--green);border-radius:50%;animation:blink 2s infinite; }
 
-  /* ════════════════════════════════
-     SCREEN 3 – ANALYTICS (Power BI)
-  ════════════════════════════════ */
-  .analytics-page { padding:28px;overflow-y:auto;height:calc(100vh - 56px); }
+  
+     /*SCREEN 3 – ANALYTICS (Power BI)*/
+  
+  .analytics-page { padding:28px;overflow-y:auto;height:calc(100vh - 84px); }
   .analytics-hero { margin-bottom:24px; }
   .analytics-hero h1 { font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--text);margin-bottom:6px; }
   .analytics-hero p { font-size:13px;color:var(--muted); }
@@ -200,10 +200,8 @@
   .powerbi-placeholder p { font-size:13px;color:var(--muted);max-width:480px;line-height:1.6; }
   .powerbi-placeholder code { font-family:'DM Mono',monospace;font-size:11px;background:var(--mid);padding:2px 8px;border-radius:4px;color:var(--text); }
 
-  /* ════════════════════════════════
-     SCREEN 4 – REPORT FORM
-  ════════════════════════════════ */
-  .report-page { padding:28px;overflow-y:auto;height:calc(100vh - 56px); }
+  /* SCREEN 4 – REPORT FORM */
+  .report-page { padding:28px;overflow-y:auto;height:calc(100vh - 84px); }
   .report-layout { display:grid;grid-template-columns:1fr 380px;gap:20px; }
   .report-form-card { background:var(--white);border:1px solid var(--border);border-radius:10px;padding:28px;box-shadow:0 1px 4px rgba(0,0,0,0.06); }
   .report-hero-badge { display:inline-block;background:var(--red);color:white;font-size:9px;font-weight:700;letter-spacing:2px;padding:3px 10px;border-radius:3px;text-transform:uppercase;margin-bottom:10px; }
@@ -261,16 +259,37 @@
   .toast.error-toast { border-color:var(--red); }
 
   /* Status select (admin) */
-  .status-select { font-size:10px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;background:var(--white);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif; }
+  .status-select { font-size:10px;padding:4px 6px;border:1px solid var(--border);border-radius:4px;background:var(--white);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;flex:1;min-width:0;max-width:130px; }
   .status-select:focus { outline:none;border-color:var(--blue); }
 
   /* Admin-only: hidden for regular users */
   .admin-only { display:none; }
   body.is-admin .admin-only { display:flex; }
 
+  /* ── Responsive ── */
+  @media(max-width:1100px){
+    .dashboard-layout { grid-template-columns: 320px 1fr; }
+    .kpi-grid { grid-template-columns: repeat(2,1fr); }
+  }
   @media(max-width:900px){
-    .dashboard-layout,.safety-layout,.report-layout { grid-template-columns:1fr; }
+    .dashboard-layout { grid-template-columns:1fr; height:auto; }
+    .safety-layout,.report-layout { grid-template-columns:1fr; }
     .dash-map,.safety-map,.report-sidebar { display:none; }
+    .report-page,.analytics-page { padding:16px; }
+    .nav-tab { padding:6px 10px; font-size:11px; }
+    .nav-title { font-size:16px; }
+    /* Full-height sidebar scroll on mobile */
+    .dash-sidebar { height:calc(100vh - 84px); }
+  }
+  @media(max-width:640px){
+    .nav-tab  { padding:5px 8px; font-size:10px; letter-spacing:0; }
+    .nav-user,.role-badge { display:none; }
+    .animal-type-grid { grid-template-columns: repeat(2,1fr); }
+    .report-form-card h1 { font-size:34px; }
+    .report-form-card { padding:18px; }
+    .dash-stats { gap:8px; padding:12px; }
+    .dash-sidebar-header { padding:14px 14px 12px; }
+    .inc-actions { flex-wrap:wrap; }
   }
 </style>
 </head>
@@ -307,9 +326,7 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════
-     SCREEN 1 – DASHBOARD
-═══════════════════════════════ -->
+<!-- SCREEN 1 – DASHBOARD-->
 <div id="screen-dashboard" class="screen active">
   <div class="dashboard-layout">
     <div class="dash-sidebar">
@@ -357,9 +374,7 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════
-     SCREEN 2 – SAFETY PORTAL
-═══════════════════════════════ -->
+<!-- SCREEN 2 – SAFETY PORTAL-->
 <div id="screen-safety" class="screen">
   <div class="safety-layout">
     <div class="safety-main">
@@ -431,9 +446,7 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════
-     SCREEN 3 – ANALYTICS (Power BI)
-═══════════════════════════════ -->
+<!--  SCREEN 3 – ANALYTICS (Power BI)-->
 <div id="screen-analytics" class="screen">
   <div class="analytics-page">
     <div class="analytics-hero">
@@ -473,9 +486,7 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════
-     SCREEN 4 – REPORT FORM
-═══════════════════════════════ -->
+<!-- SCREEN 4 – REPORT FORM-->
 <div id="screen-report" class="screen">
   <div class="report-page">
     <div class="report-layout">
@@ -529,13 +540,13 @@
       </div>
 
       <div class="report-sidebar">
-        <div class="advisory-card">
+        <div class="advisory-card" id="advisory-card">
           <div class="advisory-header">
             <span class="advisory-icon">⚠️</span>
             <span class="advisory-title">Active Advisory</span>
           </div>
           <div class="advisory-text" id="advisory-text">
-            Increased snake activity reported near campus perimeters. Exercise caution near bushy or low-light areas.
+            Loading latest advisory…
           </div>
         </div>
 
@@ -562,19 +573,19 @@
 </div>
 
 <script>
-// ── NAV USER INFO ────────────────────────────────────────────────────────────
+// ── NAV USER INFO 
 document.getElementById("nav-user-name").textContent = CURRENT_USER?.name || "";
 const roleBadge = document.getElementById("nav-role-badge");
 roleBadge.textContent = IS_ADMIN ? "Admin" : "User";
 roleBadge.className   = `role-badge ${IS_ADMIN ? "admin" : "user"}`;
 
-// ── LOGOUT ───────────────────────────────────────────────────────────────────
+// ── LOGOUT 
 function logout() {
   sessionStorage.clear();
   window.location.href = "/login";
 }
 
-// ── NAVIGATION ───────────────────────────────────────────────────────────────
+// ── NAVIGATION
 function showScreen(id, btn) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
@@ -585,7 +596,7 @@ function showScreen(id, btn) {
   if (id === "report")    setTimeout(drawReportMap, 100);
 }
 
-// ── DISMISS INCIDENT CARD ────────────────────────────────────────────────────
+// ── DISMISS INCIDENT CARD 
 function dismissCard(btn) {
   const card = btn.closest(".incident-card");
   card.style.opacity   = "0";
@@ -593,7 +604,7 @@ function dismissCard(btn) {
   setTimeout(() => card.remove(), 300);
 }
 
-// ── THREAT LEVEL STYLING ─────────────────────────────────────────────────────
+// ── THREAT LEVEL STYLING 
 function threatStyle(threatLevel) {
   if (threatLevel.includes("Extreme"))     return { cardClass:"extreme",      badgeClass:"badge-extreme",       tagClass:"tag-red",    short:"Extreme" };
   if (threatLevel.includes("Priority"))    return { cardClass:"priority",     badgeClass:"badge-priority",      tagClass:"tag-yellow", short:"Priority" };
@@ -601,7 +612,7 @@ function threatStyle(threatLevel) {
   return                                          { cardClass:"informational", badgeClass:"badge-informational", tagClass:"tag-blue",   short:"Info" };
 }
 
-// ── ANIMAL SELECT ────────────────────────────────────────────────────────────
+// ── ANIMAL SELECT 
 function selectAnimal(btn) {
   btn.closest(".animal-type-grid").querySelectorAll(".animal-type-btn").forEach(b => b.classList.remove("selected"));
   btn.classList.add("selected");
@@ -610,7 +621,7 @@ function selectAnimal(btn) {
   if (!isOther) document.getElementById("other-animal-input").value = "";
 }
 
-// ── FILE UPLOAD ──────────────────────────────────────────────────────────────
+// ── FILE UPLOAD 
 function handleFileUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -618,7 +629,7 @@ function handleFileUpload(e) {
     `<div class="upload-icon">✅</div><div class="upload-text"><strong>${file.name}</strong><br>File ready to submit</div>`;
 }
 
-// ── SHOW TOAST ───────────────────────────────────────────────────────────────
+// ── SHOW TOAST 
 function showToast(title, msg, isError = false) {
   const toast = document.getElementById("toast");
   document.getElementById("toast-title").textContent = title;
@@ -629,7 +640,7 @@ function showToast(title, msg, isError = false) {
   setTimeout(() => toast.classList.remove("show"), 3500);
 }
 
-// ── LOAD ANIMAL TYPES ────────────────────────────────────────────────────────
+// ── LOAD ANIMAL TYPES 
 async function loadAnimals() {
   try {
     const res     = await fetch("/api/animals");
@@ -651,7 +662,7 @@ async function loadAnimals() {
   }
 }
 
-// ── SUBMIT REPORT ────────────────────────────────────────────────────────────
+// ── SUBMIT REPORT 
 async function submitReport() {
   const selectedBtn = document.querySelector(".animal-type-btn.selected");
   let animal = selectedBtn?.dataset.animal || "";
@@ -680,7 +691,7 @@ async function submitReport() {
   }
 }
 
-// ── UPDATE REPORT STATUS (admin only) ────────────────────────────────────────
+// ── UPDATE REPORT STATUS (admin only) 
 async function updateStatus(id, status) {
   try {
     const res = await fetch(`/api/reports/${id}`, {
@@ -696,7 +707,7 @@ async function updateStatus(id, status) {
   }
 }
 
-// ── DELETE REPORT (admin only) ────────────────────────────────────────────────
+// ── DELETE REPORT (admin only) 
 async function deleteReport(id) {
   if (!confirm("Permanently delete this report? This cannot be undone.")) return;
   try {
@@ -712,7 +723,7 @@ async function deleteReport(id) {
   }
 }
 
-// ── LOAD REPORTS ─────────────────────────────────────────────────────────────
+// ── LOAD REPORTS
 async function loadReports() {
   try {
     const res = await fetch("/api/reports", { headers: authHeaders() });
@@ -724,27 +735,41 @@ async function loadReports() {
     if (!Array.isArray(reports)) return;
 
     const valid = reports.filter(r => r.animal && r.location && r.description && r.threatLevel);
+    window.__liveReports = valid; // used by the map canvas
 
-    // ── KPIs ─────────────────────────────────────────────────────────────────
+    // ── KPIs 
     document.getElementById("extreme-count").textContent  = valid.filter(r => r.threatLevel.includes("Extreme")).length;
     document.getElementById("resolved-count").textContent = valid.filter(r => r.status === "Resolved").length;
     document.getElementById("active-incident-count").textContent = `${valid.length} Active`;
 
-    // ── Latest sighting ───────────────────────────────────────────────────────
+    // ── Latest sighting 
     if (valid.length > 0) {
       const l = valid[0];
       document.getElementById("latest-sighting-text").textContent =
         `Latest: ${l.animal} spotted near ${l.location} — ${l.time || ""}`;
     }
 
-    // ── Advisory: pull from most recent extreme report ────────────────────────
-    const extremes = valid.filter(r => r.threatLevel.includes("Extreme"));
-    if (extremes.length > 0) {
-      document.getElementById("advisory-text").textContent =
-        `${extremes[0].animal} reported near ${extremes[0].location}. ${extremes[0].description}`;
+    // ── Advisory: driven by most recent active Extreme or Priority report ─────
+    const urgent       = valid.filter(r =>
+      (r.threatLevel.includes("Extreme") || r.threatLevel.includes("Priority")) &&
+      r.status !== "Resolved"
+    );
+    const advisoryEl   = document.getElementById("advisory-text");
+    const advisoryCard = document.getElementById("advisory-card");
+    if (urgent.length > 0) {
+      const top = urgent[0];
+      advisoryEl.textContent         = `${top.animal} reported near ${top.location}. ${top.description || "Exercise caution in the area."}`;
+      advisoryCard.style.background  = "";
+      advisoryCard.style.borderColor = "";
+      advisoryEl.style.color         = "";
+    } else {
+      advisoryEl.textContent         = "No active advisories at this time. Campus is clear.";
+      advisoryCard.style.background  = "#f0fdf4";
+      advisoryCard.style.borderColor = "rgba(22,163,74,0.3)";
+      advisoryEl.style.color         = "var(--green)";
     }
 
-    // ── Ticker ────────────────────────────────────────────────────────────────
+    // ── Ticker
     const ticker = document.getElementById("live-ticker");
     ticker.innerHTML = "";
     const tickerItems = [...valid.slice(0,8), ...valid.slice(0,8)];
@@ -753,7 +778,7 @@ async function loadReports() {
       ticker.innerHTML += `<span class="ticker-item">${icon} ${r.animal} reported near ${r.location}<span class="ticker-sep"> | </span></span>`;
     });
 
-    // ── Render lists ──────────────────────────────────────────────────────────
+    // ── Render lists
     const incidentsList   = document.getElementById("incidents-list");
     const sidebarReports  = document.getElementById("recent-sidebar-reports");
     incidentsList.innerHTML  = "";
@@ -765,7 +790,7 @@ async function loadReports() {
     sorted.forEach(report => {
       const { cardClass, badgeClass, tagClass, short } = threatStyle(report.threatLevel);
 
-      // ── Dashboard incident card ───────────────────────────────────────────
+      // ── Dashboard incident card 
       const card = document.createElement("div");
       card.className = `incident-card ${cardClass}`;
       card.innerHTML = `
@@ -773,22 +798,20 @@ async function loadReports() {
         <span class="inc-badge ${badgeClass}">${short}</span>
         <div class="inc-name">${report.animal}</div>
         <div class="inc-loc">📍 ${report.location}</div>
+        <div class="inc-time">🕐 ${report.date || ""} ${report.time || ""}</div>
         <div class="inc-actions">
           ${IS_ADMIN ? `
             <select class="status-select" onchange="updateStatus('${report._id}', this.value)">
-              <option value="" disabled selected>Change status…</option>
-              <option value="Active">Active</option>
-              <option value="Investigating">Investigating</option>
-              <option value="Resolved">Resolved</option>
+              <option value="Active"        ${report.status === 'Active'        ? 'selected' : ''}>Active</option>
+              <option value="Investigating" ${report.status === 'Investigating' ? 'selected' : ''}>Investigating</option>
+              <option value="Resolved"      ${report.status === 'Resolved'      ? 'selected' : ''}>Resolved</option>
             </select>
-            <button class="btn-sm btn-danger" onclick="deleteReport('${report._id}')">Delete</button>
-          ` : `
-            <button class="btn-sm btn-ghost">Details</button>
-          `}
+            <button class="btn-sm btn-danger" onclick="deleteReport('${report._id}')">🗑 Delete</button>
+          ` : ``}
         </div>`;
       incidentsList.appendChild(card);
 
-      // ── Sidebar item ──────────────────────────────────────────────────────
+      // ── Sidebar item 
       sidebarReports.innerHTML += `
         <div class="rr-item">
           <div class="rr-name">🐾 ${report.animal}</div>
@@ -805,7 +828,7 @@ async function loadReports() {
   }
 }
 
-// ── CANVAS: DASHBOARD MAP ────────────────────────────────────────────────────
+// ── CANVAS: DASHBOARD MAP 
 function drawDashMap() {
   const canvas = document.getElementById("campus-map-canvas");
   if (!canvas) return;
@@ -842,24 +865,55 @@ function drawDashMap() {
   ctx.beginPath();ctx.moveTo(W*.45,H*.1);ctx.lineTo(W*.45,H*.9);ctx.stroke();
   ctx.setLineDash([]);
 
-  const pins = [
-    {x:.22,y:.22,color:"#C8102E",label:"Leopard",pulse:true},
-    {x:.58,y:.35,color:"#d97706",label:"Cape Cobra"},
-    {x:.28,y:.55,color:"#2563eb",label:"Baboon Troop"},
-    {x:.62,y:.55,color:"#16a34a",label:"Wildcat"},
-    {x:.44,y:.18,color:"#C8102E",label:"Puff Adder",pulse:true},
-  ];
-  pins.forEach(p => {
-    const px=p.x*W, py=p.y*H;
-    if(p.pulse){ const r=(Math.sin(Date.now()/500)*.3+.7)*20; ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);ctx.fillStyle="rgba(200,16,46,0.12)";ctx.fill(); }
-    ctx.beginPath();ctx.arc(px,py,7,0,Math.PI*2);ctx.fillStyle=p.color;ctx.fill();ctx.strokeStyle="white";ctx.lineWidth=2;ctx.stroke();
-    ctx.fillStyle="rgba(255,255,255,0.95)";ctx.beginPath();ctx.roundRect(px-30,py+10,60,16,3);ctx.fill();
-    ctx.strokeStyle="rgba(0,0,0,0.1)";ctx.lineWidth=1;ctx.stroke();
-    ctx.fillStyle="#1a1d23";ctx.font="bold 9px DM Sans";ctx.textAlign="center";ctx.fillText(p.label,px,py+21);ctx.textAlign="left";
+  // Pins driven from live reports — positions spread pseudo-randomly but
+  // consistently per report ID so they don't jump on every redraw
+  function seededPos(id, axis) {
+    let h = 0;
+    for (let i = 0; i < id.length; i++) h = (Math.imul(31, h) + id.charCodeAt(i)) | 0;
+    const val = ((h >>> 0) % 1000) / 1000;
+    return axis === "x" ? 0.1 + val * 0.8 : 0.1 + (((h >>> 10) & 0x3FF) / 1023) * 0.8;
+  }
+
+  const liveReports = window.__liveReports || [];
+  const displayed   = liveReports.slice(0, 8);
+
+  if (displayed.length === 0) {
+    ctx.fillStyle = "rgba(40,60,100,0.4)"; ctx.font = "12px DM Sans"; ctx.textAlign = "center";
+    ctx.fillText("No active incidents", W*0.5, H*0.5);
+    ctx.textAlign = "left";
+  }
+
+  displayed.forEach(r => {
+    const id = r._id || String(Math.random());
+    const px = seededPos(id, "x") * W;
+    const py = seededPos(id, "y") * H;
+
+    let color = "#2563eb";
+    let pulse = false;
+    if (r.threatLevel?.includes("Extreme"))  { color = "#C8102E"; pulse = true; }
+    else if (r.threatLevel?.includes("Priority"))     { color = "#d97706"; }
+    else if (r.status === "Resolved")                  { color = "#16a34a"; }
+
+    if (pulse) {
+      const radius = (Math.sin(Date.now()/500)*0.3+0.7)*18;
+      ctx.beginPath(); ctx.arc(px,py,radius,0,Math.PI*2);
+      ctx.fillStyle="rgba(200,16,46,0.12)"; ctx.fill();
+    }
+    ctx.beginPath(); ctx.arc(px,py,7,0,Math.PI*2);
+    ctx.fillStyle=color; ctx.fill();
+    ctx.strokeStyle="white"; ctx.lineWidth=2; ctx.stroke();
+
+    const label = (r.animal||"Unknown").substring(0,14);
+    const lw    = ctx.measureText(label).width + 12;
+    ctx.fillStyle="rgba(255,255,255,0.95)";
+    ctx.beginPath(); ctx.roundRect(px-lw/2, py+10, lw, 16, 3); ctx.fill();
+    ctx.strokeStyle="rgba(0,0,0,0.08)"; ctx.lineWidth=1; ctx.stroke();
+    ctx.fillStyle="#1a1d23"; ctx.font="bold 9px DM Sans"; ctx.textAlign="center";
+    ctx.fillText(label, px, py+21); ctx.textAlign="left";
   });
 }
 
-// ── CANVAS: SAFETY MAP ───────────────────────────────────────────────────────
+// ── CANVAS: SAFETY MAP 
 function drawSafetyMap() {
   const canvas = document.getElementById("safety-map-canvas");
   if(!canvas) return;
@@ -884,7 +938,7 @@ function drawSafetyMap() {
   ctx.fillText("ACTIVE INCIDENT: MAIN CAMPUS",W*.5,H*.4+26);
 }
 
-// ── CANVAS: REPORT MAP ───────────────────────────────────────────────────────
+// ── CANVAS: REPORT MAP 
 function drawReportMap() {
   const canvas = document.getElementById("report-map");
   if(!canvas) return;
@@ -907,7 +961,7 @@ function drawReportMap() {
   ctx.fillText("Your Location",W*.5,H*.5+22);
 }
 
-// ── INIT ─────────────────────────────────────────────────────────────────────
+// ── INIT 
 window.addEventListener("load", () => {
   loadAnimals();
   loadReports();

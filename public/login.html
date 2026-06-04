@@ -47,7 +47,7 @@
       <!-- Heading -->
       <div class="secure-heading">SECURE ACCESS</div>
       <p class="secure-desc">
-        Sign in with your institutional Microsoft account or your email and password.
+        Sign in with your Belgium Campus Microsoft account or your email and password.
       </p>
 
       <!-- Alert message -->
@@ -96,8 +96,12 @@
           <input type="text" id="signup-name" autocomplete="name" required placeholder="Jane Doe" minlength="2" maxlength="80">
         </div>
         <div class="field">
-          <label for="signup-email">Email</label>
-          <input type="email" id="signup-email" autocomplete="email" required placeholder="you@example.com">
+          <label for="signup-email">
+            Email
+            <span id="role-hint" class="role-hint" style="display:none"></span>
+          </label>
+          <input type="email" id="signup-email" autocomplete="email" required placeholder="you@belgiumcampus.ac.za">
+          <p class="hint">Use your Belgium Campus email address.</p>
         </div>
         <div class="field">
           <label for="signup-password">Password</label>
@@ -126,7 +130,6 @@
       </div>
 
       <ul class="sysinfo-list">
-        <li><span class="si-icon">🔒</span><span>Secured via Microsoft Entra ID (Azure AD)</span></li>
         <li><span class="si-icon">🏫</span><span>Belgium Campus ITversity — Pretoria</span></li>
         <li><span class="si-icon">🐾</span><span>SA Wildlife Incident Management v2.0</span></li>
       </ul>
