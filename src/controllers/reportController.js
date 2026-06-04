@@ -109,6 +109,41 @@ export const updateReport = async (req, res) =>
   }
 }; // updateReport
 
+// UPDATE INCIDENT STATUS
+export const updateReportStatus = async (req, res) =>
+{
+  try
+  {
+    const { status } = req.body;
+
+    const validStatuses = ["Active", "Investigating", "Resolved"];
+
+    if (!validStatuses.includes(status))
+    {
+      return res.status(400).json({ message: "Invalid status." });
+    }
+
+    const updatedReport = await Incident.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      {
+        new: true,
+        runValidators: true
+      });
+
+    if (!updatedReport)
+    {
+      return res.status(404).json({ message: "Report not found." });
+    }
+
+    res.json({ message: "Status updated successfully.", data: updatedReport });
+  }
+  catch (error)
+  {
+    res.status(400).json({ message: "Failed to update status.", error: error.message });
+  }
+};
+
 // DELETE report
 export const deleteReport = async (req, res) =>
 {

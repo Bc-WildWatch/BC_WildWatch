@@ -35,6 +35,15 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: "Please enter a valid email address." });
     }
 
+    const isStudentEmail = cleanEmail.endsWith("@student.belgiumcampus.ac.za");
+
+    const isStaffEmail = cleanEmail.endsWith("@belgiumcampus.ac.za") && !cleanEmail.endsWith("@student.belgiumcampus.ac.za");
+
+    if (!isStudentEmail && !isStaffEmail)
+    {
+      return res.status(400).json({ message: "Please register using your Belgium Campus email address."});
+    }
+
     // ── Password strength ─────────────────────────────────────────────────────
     if (password.length < 8) {
       return res.status(400).json({ message: "Password must be at least 8 characters." });
@@ -53,11 +62,18 @@ export const register = async (req, res) => {
     }
 
     const hash    = await bcrypt.hash(password, 12);
+
+    let userRole = "student";
+    if (isStaffEmail)
+    {
+      userRole = "admin";
+    }
+
     const newUser = await User.create({
       name: cleanName,
       email: cleanEmail,
       password: hash,
-      role: role === "admin" ? "admin" : "user"
+      role: userRole
     });
 
     const token = signToken(newUser);

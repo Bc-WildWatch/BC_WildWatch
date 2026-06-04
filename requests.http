@@ -10,16 +10,34 @@ POST http://localhost:3000/api/reports
 Content-Type: application/json
 
 {
-  "animal": "Leopard",
-  "location": "Main Campus Gate B",
-  "date": "2026-05-06",
+  "animal": "Snake",
+  "location": "IT Block",
+  "date": "2026-06-04",
   "time": "14:30",
-  "description": "Large leopard seen near entrance.",
-  "threatLevel": "Extreme"
+  "description": "Snake observed near the IT Block entrance.",
+  "threatLevel": "🟡 Priority — Requires response"
 }
 
 ### Update report
-PUT http://localhost:3000/api/reports/1
+PUT http://localhost:3000/api/reports/<REPORT_ID>
+Content-Type: application/json
+
+{
+  "status": "Resolved"
+}
+
+### Admin Status Update Test (Should Succeed)
+PATCH http://localhost:3000/api/reports/<REPORT_ID>/status
+Authorization: Bearer <ADMIN_TOKEN>
+Content-Type: application/json
+
+{
+  "status": "Resolved"
+}
+
+### Student Status Update Test (Should Return 403)
+PATCH http://localhost:3000/api/reports/<REPORT_ID>/status
+Authorization: Bearer <STUDENT_TOKEN>
 Content-Type: application/json
 
 {
@@ -27,4 +45,22 @@ Content-Type: application/json
 }
 
 ### Delete report
-DELETE http://localhost:3000/api/reports/1
+DELETE http://localhost:3000/api/reports/<REPORT_ID>
+
+### Admin Login
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "jordann@belgiumcampus.ac.za",
+  "password": "Password1"
+}
+
+### Student Login
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "600123@student.belgiumcampus.ac.za",
+  "password": "Password2"
+}
