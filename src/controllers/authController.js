@@ -2,8 +2,17 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-const MAX_ATTEMPTS   = 5;
+const MAX_ATTEMPTS    = 5;
 const LOCKOUT_MINUTES = 15;
+
+// ── Role is derived automatically from email domain ───────────────────────────
+// @student.belgiumcampus.ac.za  → "user"
+// @belgiumcampus.ac.za          → "admin"
+function getRoleFromEmail(email) {
+  if (email.endsWith("@student.belgiumcampus.ac.za")) return "user";
+  if (email.endsWith("@belgiumcampus.ac.za"))          return "admin";
+  return null; // not a recognised campus domain
+}
 
 const signToken = (user) =>
   jwt.sign(
@@ -15,9 +24,9 @@ const signToken = (user) =>
 // POST /api/auth/register
 export const register = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
 
-    // ── Required fields ──────────────────────────────────────────────────────
+    // ── Required fields ───────────────────────────────────────────────────────
     if (!name || !email || !password) {
       return res.status(400).json({ message: "Name, email and password are required." });
     }
@@ -30,9 +39,17 @@ export const register = async (req, res) => {
 
     // ── Email format ──────────────────────────────────────────────────────────
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const cleanEmail = email.toLowerCase().trim();
+    const cleanEmail  = email.toLowerCase().trim();
     if (!emailRegex.test(cleanEmail)) {
       return res.status(400).json({ message: "Please enter a valid email address." });
+    }
+
+    // ── Campus domain check ───────────────────────────────────────────────────
+    const role = getRoleFromEmail(cleanEmail);
+    if (!role) {
+      return res.status(403).json({
+        message: "Registration is restricted to Belgium Campus email addresses (@belgiumcampus.ac.za or @student.belgiumcampus.ac.za)."
+      });
     }
 
     // ── Password strength ─────────────────────────────────────────────────────
@@ -53,12 +70,7 @@ export const register = async (req, res) => {
     }
 
     const hash    = await bcrypt.hash(password, 12);
-    const newUser = await User.create({
-      name: cleanName,
-      email: cleanEmail,
-      password: hash,
-      role: role === "admin" ? "admin" : "user"
-    });
+    const newUser = await User.create({ name: cleanName, email: cleanEmail, password: hash, role });
 
     const token = signToken(newUser);
     res.status(201).json({
@@ -76,21 +88,19 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // ── Required fields ───────────────────────────────────────────────────────
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password are required." });
     }
 
-    // ── Email format ──────────────────────────────────────────────────────────
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const cleanEmail = email.toLowerCase().trim();
+    const cleanEmail  = email.toLowerCase().trim();
     if (!emailRegex.test(cleanEmail)) {
       return res.status(400).json({ message: "Please enter a valid email address." });
     }
 
     const user = await User.findOne({ email: cleanEmail });
 
-    // ── Account lockout check ─────────────────────────────────────────────────
+    // ── Lockout check ─────────────────────────────────────────────────────────
     if (user?.lockedUntil && user.lockedUntil > new Date()) {
       const minutesLeft = Math.ceil((user.lockedUntil - Date.now()) / 60000);
       return res.status(423).json({
@@ -98,7 +108,6 @@ export const login = async (req, res) => {
       });
     }
 
-    // ── User not found or no password (SSO-only account) ─────────────────────
     if (!user || !user.password) {
       return res.status(401).json({ message: "Invalid email or password." });
     }
@@ -106,7 +115,6 @@ export const login = async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
 
     if (!match) {
-      // Increment failed attempts
       user.failedAttempts = (user.failedAttempts || 0) + 1;
 
       if (user.failedAttempts >= MAX_ATTEMPTS) {
@@ -125,7 +133,7 @@ export const login = async (req, res) => {
       });
     }
 
-    // ── Success: reset lockout counters ───────────────────────────────────────
+    // ── Success ───────────────────────────────────────────────────────────────
     user.failedAttempts = 0;
     user.lockedUntil    = null;
     await user.save();
@@ -166,12 +174,22 @@ export const microsoftLogin = async (req, res) => {
       return res.status(400).json({ message: "Could not retrieve email from Microsoft account." });
     }
 
+    // ── Campus domain check ───────────────────────────────────────────────────
+    const role = getRoleFromEmail(email);
+    if (!role) {
+      return res.status(403).json({
+        message: "Access is restricted to Belgium Campus accounts (@belgiumcampus.ac.za)."
+      });
+    }
+
     let user = await User.findOne({ $or: [{ microsoftId }, { email }] });
 
     if (!user) {
-      user = await User.create({ name, email, microsoftId, role: "user" });
-    } else if (!user.microsoftId) {
-      user.microsoftId = microsoftId;
+      user = await User.create({ name, email, microsoftId, role });
+    } else {
+      // Keep role in sync with email domain in case domain policy changes
+      if (!user.microsoftId) user.microsoftId = microsoftId;
+      if (user.role !== role) user.role = role;
       await user.save();
     }
 

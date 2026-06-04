@@ -19,7 +19,6 @@ const incidentSchema = new mongoose.Schema(
       "Stray Dog",
       "Lizard",
       "Cockroach",
-      "Ant Infestation",
       "Other"
     ],
 
