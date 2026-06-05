@@ -1,4 +1,4 @@
-const STANDARD_ANIMALS = ["Snake", "Bee Swarm", "Stray Dog", "Cockroach", "Lizard", "Ant Infestation", "Other"];
+const STANDARD_ANIMALS = ["Snake", "Bee Swarm", "Stray Dog", "Cockroach", "Other"];
 
 const VALID_THREAT_LEVELS = [
   "🟢 Benign — Non-threatening observation",
