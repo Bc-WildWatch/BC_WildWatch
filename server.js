@@ -33,9 +33,7 @@ const DEFAULT_ANIMALS = [
   { name: "Snake",           emoji: "🐍" },
   { name: "Bee Swarm",       emoji: "🐝" },
   { name: "Stray Dog",       emoji: "🐕" },
-  { name: "Lizard",          emoji: "🦎" },
   { name: "Cockroach",       emoji: "🪳" },
-  { name: "Ant Infestation", emoji: "🐜" },
   { name: "Other",           emoji: "⚠" }
 ];
 
