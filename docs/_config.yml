@@ -1,0 +1,21 @@
+theme: jekyll-theme-primer
+title: BC WildWatch
+description: Wildlife monitoring and tracking system for British Columbia
+
+# Disable features that cause build issues
+exclude:
+  - node_modules
+  - vendor
+  - .git
+  - .gitignore
+
+# Prevent Jekyll from processing certain files
+include: []
+
+# Keep the folder structure simple
+collections_dir: .
+
+# Disable SCSS processing issues
+sass:
+  sass_dir: _sass
+  style: compressed
