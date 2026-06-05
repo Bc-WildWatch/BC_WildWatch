@@ -39,7 +39,6 @@ const DEFAULT_ANIMALS = [
   { name: "Other",           emoji: "⚠" }
 ];
 
-// ── Animal types endpoint ──
 app.get("/api/animals", async (_req, res) => {
   try {
     const docs = await AnimalType.find({}, "name emoji").lean();
@@ -61,20 +60,7 @@ app.get("/login", (_req, res) =>
 app.get("/", (_req, res) =>
   res.sendFile(path.join(__dirname, "public", "login.html")));
 
-// ── Server startup ──
 const PORT = process.env.PORT || 3000;
-const NODE_ENV = process.env.NODE_ENV || "development";
 
-const server = app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}.\nhttp://localhost:${PORT}`);
-  console.log(`Environment: ${NODE_ENV}`);
-});
-
-// ── Graceful shutdown ──
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
-  server.close(() => {
-    console.log('Server closed');
-    process.exit(0);
-  });
-});
+app.listen(PORT, () =>
+  console.log(`Server running on port ${PORT}.\nhttp://localhost:${PORT}`));
