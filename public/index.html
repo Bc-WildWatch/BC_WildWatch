@@ -458,18 +458,12 @@
         </div>
       </div>
 
-      <!-- Replace the src below with your actual Power BI embed URL -->
       <div id="powerbi-container">
-        <div class="powerbi-placeholder" id="powerbi-placeholder">
-          <div class="powerbi-placeholder-icon">📊</div>
-          <h2>POWER BI REPORT</h2>
-          <p>Your Power BI dashboard will appear here. To embed your report, add your embed URL to the environment:</p>
-          <code>POWERBI_EMBED_URL=https://app.powerbi.com/reportEmbed?reportId=…</code>
-          <p style="margin-top:12px;font-size:11px;">
-            In <strong>index.html</strong>, replace the placeholder with:<br>
-            <code>&lt;iframe src="YOUR_EMBED_URL" class="powerbi-frame"&gt;&lt;/iframe&gt;</code>
-          </p>
-        </div>
+        <iframe
+          src="https://app.powerbi.com/view?r=eyJrIjoiY2JhN2FiNmUtYTMxZS00NmVhLWE2MzYtODlkMDQyYWI1MTJmIiwidCI6ImVhMWE5MDliLTY2MDAtNGEyNS04MmE1LTBjNmVkN2QwNTEzYiIsImMiOjl9"
+          class="powerbi-frame"
+          allowFullScreen="true">
+        </iframe>
       </div>
     </div>
   </div>
