@@ -1,0 +1,67 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Lint code (if eslint is configured)
+      run: npm run lint --if-present
+    
+    - name: Run tests
+      run: npm test --if-present
+    
+    - name: Check for security vulnerabilities
+      run: npm audit --audit-level=moderate
+    
+    - name: Build application
+      run: npm run build --if-present
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy to hosting service
+      # Configure based on your hosting provider (Heroku, Railway, Render, DigitalOcean, etc.)
+      # Example for Heroku:
+      # run: |
+      #   git push https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git main
+      
+      # Example for Railway:
+      # run: |
+      #   npm install -g @railway/cli
+      #   railway up --service=${{ secrets.RAILWAY_SERVICE_NAME }}
+      
+      # For now, this is a placeholder
+      run: echo "Configure deployment based on your hosting provider"
+      env:
+        # Add your deployment secrets here
+        # Examples:
+        # HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        # RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        pass: true
