@@ -1,4 +1,8 @@
 import Incident from "../models/Incident.js";
+import AnimalType from "../models/AnimalType.js";
+import Location from "../models/Location.js";
+import User from "../models/User.js";
+import { postToTeams } from "../utils/teamsNotifier.js";
 
 // GET all reports
 export const getReports = async (req, res) =>
@@ -24,18 +28,39 @@ export const createReport = async (req, res) =>
   try
   {
     const { animal,
+            customAnimal,
             location,
             date,
             time,
             description,
             threatLevel } = req.body;
 
-    const newReport = await Incident.create({ animal,
-                                            location,
-                                            date,
-                                            time,
-                                            description,
-                                            threatLevel });
+    const animalType  = await AnimalType.findOne({ name: animal });
+    const locationDoc = await Location.findOne({ building_name: location });
+
+    // Use the authenticated user from the JWT (set by requireAuth middleware)
+    const userId = req.user?.id;
+
+    const newReport = await Incident.create({
+      animal,
+      ...(customAnimal ? { customAnimal } : {}),
+      animal_type_id: animalType?._id,
+      location,
+      location_id:   locationDoc?._id,
+      user_id:       userId,
+      date,
+      time,
+      description,
+      threatLevel
+    });
+
+    try
+    {
+      await postToTeams(newReport);
+    } catch (error)
+    {
+      console.error(error);
+    }
 
     res.status(201).json(
     {
@@ -85,6 +110,41 @@ export const updateReport = async (req, res) =>
     });
   }
 }; // updateReport
+
+// UPDATE INCIDENT STATUS
+export const updateReportStatus = async (req, res) =>
+{
+  try
+  {
+    const { status } = req.body;
+
+    const validStatuses = ["Active", "Investigating", "Resolved"];
+
+    if (!validStatuses.includes(status))
+    {
+      return res.status(400).json({ message: "Invalid status." });
+    }
+
+    const updatedReport = await Incident.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      {
+        new: true,
+        runValidators: true
+      });
+
+    if (!updatedReport)
+    {
+      return res.status(404).json({ message: "Report not found." });
+    }
+
+    res.json({ message: "Status updated successfully.", data: updatedReport });
+  }
+  catch (error)
+  {
+    res.status(400).json({ message: "Failed to update status.", error: error.message });
+  }
+};
 
 // DELETE report
 export const deleteReport = async (req, res) =>

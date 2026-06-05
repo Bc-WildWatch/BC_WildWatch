@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In | SA WildWatch</title>
+  <link rel="stylesheet" href="login.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+</head>
+<body>
+
+  <div class="bg-overlay"></div>
+
+  <main class="page-center">
+    <div class="login-card">
+
+      <!-- Brand header -->
+      <div class="brand-header">
+        <div class="brand-logo">W</div>
+        <div class="brand-text">
+          <div class="brand-name">SA WILDWATCH</div>
+          <div class="brand-sub">CAMPUS WILDLIFE SAFETY SYSTEM</div>
+        </div>
+      </div>
+
+      <!-- Stats row -->
+      <div class="stats-row">
+        <div class="stat-item">
+          <div class="stat-value red">24/7</div>
+          <div class="stat-label">MONITORING</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-value red">4M</div>
+          <div class="stat-label">AVG RESPONSE</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-value red">SA</div>
+          <div class="stat-label">WILDLIFE DATA</div>
+        </div>
+      </div>
+
+      <!-- Heading -->
+      <div class="secure-heading">SECURE ACCESS</div>
+      <p class="secure-desc">
+        Sign in with your Belgium Campus Microsoft account or your email and password.
+      </p>
+
+      <!-- Alert message -->
+      <div id="message" class="message" role="alert" hidden></div>
+
+      <!-- Microsoft SSO -->
+      <button id="btn-microsoft" class="btn-ms" type="button">
+        <svg width="20" height="20" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+          <rect x="1"  y="1"  width="9" height="9" fill="#f25022"/>
+          <rect x="11" y="1"  width="9" height="9" fill="#7fba00"/>
+          <rect x="1"  y="11" width="9" height="9" fill="#00a4ef"/>
+          <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
+        </svg>
+        Sign in with Microsoft
+      </button>
+
+      <!-- Divider -->
+      <div class="or-divider"><span>or</span></div>
+
+      <!-- Login / Register tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login"  onclick="setMode('login')">Log in</button>
+        <button class="auth-tab"        id="tab-signup" onclick="setMode('signup')">Create account</button>
+      </div>
+
+      <!-- ── Login form ── -->
+      <form id="login-form" novalidate>
+        <div class="field">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" autocomplete="email" required placeholder="you@example.com">
+        </div>
+        <div class="field">
+          <label for="login-password">Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="login-password" autocomplete="current-password" required placeholder="Your password" minlength="8">
+            <button type="button" class="pw-toggle" data-target="login-password">Show</button>
+          </div>
+        </div>
+        <button type="submit" class="btn-email" id="login-btn">Sign in</button>
+      </form>
+
+      <!-- ── Register form ── -->
+      <form id="signup-form" style="display:none" novalidate>
+        <div class="field">
+          <label for="signup-name">Full name</label>
+          <input type="text" id="signup-name" autocomplete="name" required placeholder="Jane Doe" minlength="2" maxlength="80">
+        </div>
+        <div class="field">
+          <label for="signup-email">
+            Email
+            <span id="role-hint" class="role-hint" style="display:none"></span>
+          </label>
+          <input type="email" id="signup-email" autocomplete="email" required placeholder="you@belgiumcampus.ac.za">
+          <p class="hint">Use your Belgium Campus email address.</p>
+        </div>
+        <div class="field">
+          <label for="signup-password">Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="signup-password" autocomplete="new-password" required placeholder="Min 8 chars, 1 uppercase, 1 number" minlength="8">
+            <button type="button" class="pw-toggle" data-target="signup-password">Show</button>
+          </div>
+          <div class="strength-wrap">
+            <div class="strength-track"><div class="strength-bar" id="strength-meter"></div></div>
+            <span class="strength-label" id="strength-label"></span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="signup-confirm">Confirm password</label>
+          <div class="pw-wrap">
+            <input type="password" id="signup-confirm" autocomplete="new-password" required placeholder="Repeat password">
+            <button type="button" class="pw-toggle" data-target="signup-confirm">Show</button>
+          </div>
+        </div>
+        <button type="submit" class="btn-email" id="signup-btn">Create account</button>
+      </form>
+
+      <!-- System info -->
+      <div class="sysinfo-divider">
+        <span>SYSTEM INFO</span>
+      </div>
+
+      <ul class="sysinfo-list">
+        <li><span class="si-icon">🏫</span><span>Belgium Campus ITversity — Pretoria</span></li>
+        <li><span class="si-icon">🐾</span><span>SA Wildlife Incident Management v2.0</span></li>
+      </ul>
+
+      <!-- Footer -->
+      <p class="disclaimer">
+        By signing in you agree to the Campus Safety Data Policy.<br>
+        Unauthorised access is prohibited. All sessions are logged.<br>
+        <span class="disclaimer-contacts">
+          Emergency: <strong>10111</strong> &nbsp;|&nbsp; Campus Security: <strong>011 555 0199</strong>
+        </span>
+      </p>
+
+    </div>
+  </main>
+
+  <script src="login.js"></script>
+</body>
+</html>

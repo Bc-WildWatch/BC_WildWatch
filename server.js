@@ -1,4 +1,3 @@
-// Imports
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -7,42 +6,75 @@ import { fileURLToPath } from "url";
 
 import connectDB from "./src/config/db.js";
 import reportRoutes from "./src/routes/reportRoutes.js";
+import authRoutes from "./src/routes/authRoutes.js";
+import AnimalType from "./src/models/AnimalType.js";
 
 dotenv.config();
 connectDB();
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname  = path.dirname(__filename);
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-// Test route
-app.get("/",(req,res) =>
-{
-    res.send("BC-WildWatch API running.");
+// ── Public config consumed by the frontend (no secrets) ──
+app.get("/api/config", (_req, res) => {
+  res.json({
+    azureClientId: process.env.AZURE_CLIENT_ID || "",
+    azureTenantId: process.env.AZURE_TENANT_ID || ""
+  });
 });
 
-// Report route
-app.use("/api/reports",reportRoutes);
+// ── Animal types: pull from DB or fall back to defaults ──
+const DEFAULT_ANIMALS = [
+  { name: "Snake",           emoji: "🐍" },
+  { name: "Bee Swarm",       emoji: "🐝" },
+  { name: "Stray Dog",       emoji: "🐕" },
+  { name: "Lizard",          emoji: "🦎" },
+  { name: "Cockroach",       emoji: "🪳" },
+  { name: "Ant Infestation", emoji: "🐜" },
+  { name: "Other",           emoji: "⚠" }
+];
 
+// ── Animal types endpoint ──
+app.get("/api/animals", async (_req, res) => {
+  try {
+    const docs = await AnimalType.find({}, "name emoji").lean();
+    const animals = docs.length > 0 ? docs : DEFAULT_ANIMALS;
+    res.json(animals);
+  } catch {
+    res.json(DEFAULT_ANIMALS);
+  }
+});
+
+// ── Routes ──
+app.use("/api/auth",    authRoutes);
+app.use("/api/reports", reportRoutes);
+
+// ── Page routes ──
+app.get("/login", (_req, res) =>
+  res.sendFile(path.join(__dirname, "public", "login.html")));
+
+app.get("/", (_req, res) =>
+  res.sendFile(path.join(__dirname, "public", "login.html")));
+
+// ── Server startup ──
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || "development";
 
-const server = app.listen(PORT,() =>
-{
-    console.log(`Server running on port ${PORT}. \nhttp://localhost:${PORT}`);
-    console.log(`Environment: ${NODE_ENV}`);
+const server = app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}.\nhttp://localhost:${PORT}`);
+  console.log(`Environment: ${NODE_ENV}`);
 });
 
-// Graceful shutdown
+// ── Graceful shutdown ──
 process.on('SIGTERM', () => {
-    console.log('SIGTERM received, shutting down gracefully');
-    server.close(() => {
-        console.log('Server closed');
-        process.exit(0);
-    });
+  console.log('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
 });
