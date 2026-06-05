@@ -57,8 +57,21 @@ app.use("/api/reports", reportRoutes);
 app.get("/login", (_req, res) =>
   res.sendFile(path.join(__dirname, "public", "login.html")));
 
+app.get("/index.html", (_req, res) =>
+  res.sendFile(path.join(__dirname, "public", "index.html")));
+
+// Dashboard (default)
 app.get("/", (_req, res) =>
-  res.sendFile(path.join(__dirname, "public", "login.html")));
+  res.sendFile(path.join(__dirname, "public", "index.html")));
+
+// ── 404 handlers ──
+app.use("/api", (_req, res) => {
+  res.status(404).json({ message: "Not found" });
+});
+
+app.use((_req, res) => {
+  res.status(404).sendFile(path.join(__dirname, "public", "login.html"));
+});
 
 const PORT = process.env.PORT || 3000;
 
